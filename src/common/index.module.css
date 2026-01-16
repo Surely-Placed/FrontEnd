@@ -1,0 +1,49 @@
+.custom_phone_container {
+  height: 3.5rem !important;
+  border: 1px solid #a8adbc !important;
+  border-radius: 1rem !important;
+  margin-top: 0.5rem !important;
+}
+.custom_phone_input {
+  height: 1rem !important;
+  border-radius: 1rem !important;
+  width: 100% !important;
+  border: none !important;
+  font-size: 1rem !important;
+  font-family: var(--font-nexa), Arial, sans-serif !important;
+  /* color: #243358 !important; */
+}
+.custom_phone_button {
+  border-top-left-radius: 1rem !important;
+  border-bottom-left-radius: 1rem !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.dd_custom_phone_container {
+  height: 3.5rem !important;
+  /* background: #070b26 !important; */
+  /* border: none; */
+  border-radius: 1rem !important;
+  margin-top: 0.5rem !important;
+}
+.dd_custom_phone_input {
+  height: 3.5rem !important;
+  border-radius: 1rem !important;
+  width: 100% !important;
+  /* background: #070b26 !important; */
+  border: 1px solid#D5D7DA !important;
+  font-size: 1rem !important;
+  font-family: var(--font-nexa), Arial, sans-serif !important;
+  color: black !important;
+}
+.dd_custom_phone_button {
+  border-top-left-radius: 1rem !important;
+  border-bottom-left-radius: 1rem !important;
+  background-color: #fff !important;
+  border: 1px solid #d5d7da !important;
+  border-right: none !important;
+}
+.dd_custom_phone_button:hover {
+  background-color: #fff !important;
+}
