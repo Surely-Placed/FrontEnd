@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /backend/
+
+Sitemap: https://surelyplaced.com/sitemap.xml
