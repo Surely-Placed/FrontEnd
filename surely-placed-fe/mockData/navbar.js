@@ -12,6 +12,10 @@ export const navLinks = [
     link: '/our-story',
   },
   {
+    text: 'Careers',
+    link: '/careers',
+  },
+  {
     text: 'Become a Mentor',
     link: '/become-mentor',
   },
