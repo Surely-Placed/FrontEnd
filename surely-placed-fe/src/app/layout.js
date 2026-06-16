@@ -6,6 +6,9 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/Homepage/Footer';
 import ClientToastContainer from '@/components/ClientToastContainer';
 import { Providers } from './providers';
+import GoogleTagManager from '@/components/seo/GoogleTagManager';
+import JsonLd from '@/components/seo/JsonLd';
+import { ORGANIZATION_SCHEMA, SITE_NAME, SITE_URL, WEBSITE_SCHEMA } from '@/config/site';
 
 const avantGarde = localFont({
   src: [
@@ -46,6 +49,13 @@ const nexa = localFont({
 });
 
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} | Career Coaching & Interview Analytics`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description:
+    'Move from rejections to offers with mentor-led career coaching, application support, and interview analytics from Surely Placed.',
   icons: {
     icon: '/favicon.svg',
   },
@@ -54,13 +64,25 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${avantGarde.variable} ${nexa.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <JsonLd data={ORGANIZATION_SCHEMA} />
+        <JsonLd data={WEBSITE_SCHEMA} />
+      </head>
       <body>
+        <GoogleTagManager />
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <Providers>
           <ThemeRegistry>
             <ClientToastContainer />
             <Box className="limit-container">
               <Navbar />
-              {children}
+              <Box component="main" id="main-content">
+                {children}
+              </Box>
               <Footer />
             </Box>
           </ThemeRegistry>

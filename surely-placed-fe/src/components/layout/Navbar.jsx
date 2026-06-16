@@ -67,6 +67,8 @@ const Navbar = () => {
 
   return (
     <Box
+      component="header"
+      role="banner"
       p={{ xs: '1.125rem', lg: '1.125rem 6.25rem' }}
       display={'flex'}
       justifyContent={'space-between'}
@@ -79,13 +81,13 @@ const Navbar = () => {
       zIndex={2}
     >
       {!open && (
-        <Link href={'/'}>
+        <Link href={'/'} aria-label="Surely Placed home">
           <WebLogo />
         </Link>
       )}
-      <Box display={{ xs: 'none', lg: 'flex' }} gap={5}>
+      <Box component="nav" role="navigation" aria-label="Main navigation" display={{ xs: 'none', lg: 'flex' }} gap={5}>
         {navLinks.map((item, i) => (
-          <Link key={i} href={item.link} style={{ textDecoration: 'none' }}>
+          <Link key={i} href={item.link} style={{ textDecoration: 'none' }} className="touch-target">
             <Typography component={'p'} variant="subtitle1" color="text.contrastText">
               {item.text}
             </Typography>
@@ -94,7 +96,7 @@ const Navbar = () => {
       </Box>
       {!open && (
         <Box display={{ lg: 'none' }}>
-          <IconButton onClick={() => setOpen(true)}>
+          <IconButton onClick={() => setOpen(true)} aria-label="Open navigation menu" className="touch-target">
             <MoreIcon />
           </IconButton>
         </Box>
@@ -134,10 +136,10 @@ const Navbar = () => {
       >
         <Box borderRadius={'0.875rem'} p={2} sx={{ backgroundColor: 'customGray.light' }}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-            <Link href={'/'} onClick={() => setOpen(false)}>
+            <Link href={'/'} onClick={() => setOpen(false)} aria-label="Surely Placed home">
               <WebLogo />
             </Link>
-            <IconButton onClick={() => setOpen(false)}>
+            <IconButton onClick={() => setOpen(false)} aria-label="Close navigation menu" className="touch-target">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -170,7 +172,7 @@ const Navbar = () => {
                 sx={{ cursor: 'pointer', borderRadius: '0.75rem', border: '1px solid #A5A5A5' }}
                 p={'0.5rem'}
               >
-                <IconButton onClick={handleLogout}>
+                <IconButton onClick={handleLogout} aria-label="Log out" className="touch-target">
                   <LogoutIcon />
                 </IconButton>
               </Box>
@@ -185,6 +187,7 @@ const Navbar = () => {
                 href={item.link}
                 style={{ textDecoration: 'none' }}
                 onClick={() => setOpen(false)}
+                className="touch-target"
               >
                 <Typography component={'p'} variant="h4" fontWeight={400} color="text">
                   {item.text}

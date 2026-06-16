@@ -130,6 +130,8 @@ const TermsAndCondition = () => {
         content={
           <>
             <strong>Email:</strong> support@surelyplaced.com
+            <br />
+            <strong>Phone:</strong> +1 (917) 755-0774
           </>
         }
       />

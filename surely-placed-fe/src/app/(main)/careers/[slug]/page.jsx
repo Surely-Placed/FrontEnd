@@ -2,6 +2,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import CareerDetailsPage from '@/components/Careers/CareerDetailsPage';
 import { careersOpenings, getCareerBySlug } from '../../../../../mockData/Careers';
+import { buildPageMetadata } from '@/lib/seo';
 
 export async function generateStaticParams() {
   return careersOpenings.map((job) => ({
@@ -23,10 +24,11 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  return {
+  return buildPageMetadata({
     title: `${job.title} | Careers at Surely Placed`,
-    description: `${job.title} opening at Surely Placed. Explore role details, expectations, and apply now.`,
-  };
+    description: `Apply for the ${job.title} role at Surely Placed. Review responsibilities, requirements, AI expectations, and success metrics before submitting your application.`,
+    path: `/careers/${slug}`,
+  });
 }
 
 const page = async ({ params }) => {

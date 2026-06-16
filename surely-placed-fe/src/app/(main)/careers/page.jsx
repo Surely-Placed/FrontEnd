@@ -1,33 +1,13 @@
 import React from 'react';
 import CareersPage from '@/components/Careers/CareersPage';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
-  title: 'Careers at Surely Placed | Join Our Team',
+export const metadata = buildPageMetadata({
+  title: 'Careers at Surely Placed | Open Roles & Hiring',
   description:
-    'Explore open roles at Surely Placed and apply to join a high-agency team building category-defining outcomes across strategy, content, growth, and operations.',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://surelyplaced.com/careers',
-  },
-  openGraph: {
-    url: 'https://surelyplaced.com/careers',
-    title: 'Careers at Surely Placed | Join Our Team',
-    description:
-      'Explore open roles at Surely Placed and apply to join a high-agency team building category-defining outcomes across strategy, content, growth, and operations.',
-    type: 'website',
-    siteName: 'Surely Placed',
-    locale: 'en_US',
-  },
-  twitter: {
-    title: 'Careers at Surely Placed | Join Our Team',
-    description:
-      'Explore open roles at Surely Placed and apply to join a high-agency team building category-defining outcomes across strategy, content, growth, and operations.',
-    card: 'summary',
-  },
-};
+    'Explore open roles at Surely Placed across strategy, content, growth, design, and operations. Join a high-agency team building category-defining career outcomes.',
+  path: '/careers',
+});
 
 const page = () => {
   return <CareersPage />;

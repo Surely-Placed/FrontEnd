@@ -30,6 +30,7 @@ import { showToast } from '@/hooks/showToast';
 import CustomPhoneInputField from '@/common/CustomPhoneInputField';
 import CustomTimezoneSelect from '@/common/CustomTimezoneSelect';
 import Link from 'next/link';
+import { SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from '@/config/site';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -167,10 +168,12 @@ const BookSection = () => {
                   <EmailIcon />
                   <Typography sx={{ color: 'text.subText' }}>marketing@surelyplaced.com</Typography>
                 </Stack>
-                {/* <Stack direction="row" spacing={1.5} alignItems="center">
+                <Stack direction="row" spacing={1.5} alignItems="center">
                   <PhoneIcon />
-                  <Typography sx={{ color: 'text.subText' }}>(123) 456 - 789</Typography>
-                </Stack> */}
+                  <Link href={`tel:${SITE_PHONE_TEL}`} className="link-styles">
+                    <Typography sx={{ color: 'text.subText' }}>{SITE_PHONE_DISPLAY}</Typography>
+                  </Link>
+                </Stack>
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   <LocationIcon />
                   <Typography sx={{ color: 'text.subText' }}>

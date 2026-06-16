@@ -1,34 +1,14 @@
 import React from 'react';
 import BookSection from '@/components/BookACall/BookSection';
 import FirstStep from '@/components/Homepage/FirstStep';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
-  title: 'Book a Career Guidance Call | Talk to Our Team | Surely Placed',
+export const metadata = buildPageMetadata({
+  title: 'Book a Career Guidance Call | Surely Placed',
   description:
-    'Unsure about your next move? Speak with the Surely Placed team for personalized career guidance and the right path forward.',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://surelyplaced.com/book-a-call',
-  },
-  openGraph: {
-    url: 'https://surelyplaced.com/book-a-call',
-    title: 'Book a Career Guidance Call | Talk to Our Team | Surely Placed',
-    description:
-      'Unsure about your next move? Speak with the Surely Placed team for personalized career guidance and the right path forward.',
-    type: 'website',
-    siteName: 'Surely Placed',
-    locale: 'en_US',
-  },
-  twitter: {
-    title: 'Book a Career Guidance Call | Talk to Our Team | Surely Placed',
-    description:
-      'Unsure about your next move? Speak with the Surely Placed team for personalized career guidance and the right path forward.',
-    card: 'summary',
-  },
-};
+    'Speak with the Surely Placed team for personalized career guidance, cohort recommendations, and a clear roadmap from preparation to offers.',
+  path: '/book-a-call',
+});
 
 const page = () => {
   return (

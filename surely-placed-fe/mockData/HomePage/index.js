@@ -112,59 +112,31 @@ export const cohorts = [
 export const studentStories = [
   {
     comment:
-      'Vestibulum tempus imperdiet sem ac porttitor. Vivamus pulvinar commodo orci, suscipit porttitor velit elementum non. Fusce nec pellentesque erat, id lobortis nunc. Donec dui leo, ultrices quis turpis ne Vestibulum tempus imperdiet sem ac porttitor. Donec dui leo, ultrices quis turpis ne Vestibulum tempus imperdiet sem ac porttitor.',
+      'Before Surely Placed, I was getting interviews but failing at system design rounds. The mentor feedback and analytics plan helped me fix weak areas fast. I received two offers within 10 weeks.',
     profile: '/HomePage/Avatar1.webp',
     name: 'Kenneth Allen',
-    designation: 'Web Developer',
+    designation: 'Software Engineer at Google',
   },
   {
     comment:
-      'Donec a eros justo. Fusce egestas tristique ultrices. Nam tempor, augue nec tincidunt molestie, massa nunc varius arcu, at scelerisque elit erat a magna. Donec quis erat at libero ultrices mollis.Donec a eros justo. Fusce egestas tristique ultrices.Fusce egestas tristique ultrices.',
+      'The application engine gave me consistency I never had while applying alone. I went from random shortlists to a predictable interview pipeline and finally converted a senior role offer.',
     profile: '/HomePage/Avatar2.webp',
     name: 'Chris Glasser',
-    designation: 'Web Developer',
+    designation: 'Senior Frontend Engineer',
   },
   {
     comment:
-      'Vestibulum tempus imperdiet sem ac porttitor. Vivamus pulvinar commodo orci, suscipit porttitor velit elementum non. Fusce nec pellentesque erat, id lobortis nunc. Donec dui leo, ultrices quis turpis ne Vestibulum tempus imperdiet sem ac porttitor. ',
+      'As a career switcher, I needed structure. Cohort mentorship, resume repositioning, and mock interviews made my transition realistic. I landed a product role in under 4 months.',
     profile: '/HomePage/Avatar3.webp',
     name: 'Mary Freund',
-    designation: 'Web Developer',
+    designation: 'Product Manager',
   },
   {
     comment:
-      'Donec a eros justo. Fusce egestas tristique ultrices. Nam tempor, augue nec tincidunt molestie, massa nunc varius arcu, at scelerisque elit erat a magna. Donec quis erat at libero ultrices mollis.Donec a eros justo. Fusce egestas tristique ultrices.Fusce egestas tristique ultrices.',
+      'What stood out was accountability. Weekly milestones, buddy check-ins, and interview analytics kept me focused. I improved offer quality, not just interview volume.',
     profile: '/HomePage/Avatar4.webp',
     name: 'John Dukes',
-    designation: 'Web Developer',
-  },
-  {
-    comment:
-      'Vestibulum tempus imperdiet sem ac porttitor. Vivamus pulvinar commodo orci, suscipit porttitor velit elementum non. Fusce nec pellentesque erat, id lobortis nunc. Donec dui leo, ultrices quis turpis ne Vestibulum tempus imperdiet sem ac porttitor. Donec dui leo, ultrices quis turpis ne Vestibulum tempus imperdiet sem ac porttitor.',
-    profile: '/HomePage/Avatar1.webp',
-    name: 'Kenneth Allen',
-    designation: 'Web Developer',
-  },
-  {
-    comment:
-      'Donec a eros justo. Fusce egestas tristique ultrices. Nam tempor, augue nec tincidunt molestie, massa nunc varius arcu, at scelerisque elit erat a magna. Donec quis erat at libero ultrices mollis.Donec a eros justo. Fusce egestas tristique ultrices.Fusce egestas tristique ultrices.',
-    profile: '/HomePage/Avatar2.webp',
-    name: 'Chris Glasser',
-    designation: 'Web Developer',
-  },
-  {
-    comment:
-      'Vestibulum tempus imperdiet sem ac porttitor. Vivamus pulvinar commodo orci, suscipit porttitor velit elementum non. Fusce nec pellentesque erat, id lobortis nunc. Donec dui leo, ultrices quis turpis ne Vestibulum tempus imperdiet sem ac porttitor. ',
-    profile: '/HomePage/Avatar3.webp',
-    name: 'Mary Freund',
-    designation: 'Web Developer',
-  },
-  {
-    comment:
-      'Donec a eros justo. Fusce egestas tristique ultrices. Nam tempor, augue nec tincidunt molestie, massa nunc varius arcu, at scelerisque elit erat a magna. Donec quis erat at libero ultrices mollis.Donec a eros justo. Fusce egestas tristique ultrices.Fusce egestas tristique ultrices.',
-    profile: '/HomePage/Avatar4.webp',
-    name: 'John Dukes',
-    designation: 'Web Developer',
+    designation: 'Data Analyst at Amazon',
   },
 ];
 

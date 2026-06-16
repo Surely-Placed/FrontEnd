@@ -5,11 +5,17 @@ import { navLinks } from '../../../mockData/navbar';
 import Link from 'next/link';
 import { contactInfo } from '../../../mockData/Profile';
 import { footerInfo } from '../../../mockData/footer';
+import { SOCIAL_LINKS, SITE_PHONE_DISPLAY, SITE_PHONE_TEL, SUPPORT_EMAIL } from '@/config/site';
 import dayjs from 'dayjs';
+
+const footerSocialLinks = [
+  { label: 'LinkedIn', href: SOCIAL_LINKS.linkedin },
+  { label: 'Instagram', href: SOCIAL_LINKS.instagram },
+];
 
 const Footer = () => {
   return (
-    <Box px={{ xs: '2rem', md: '6rem' }}>
+    <Box component="footer" role="contentinfo" px={{ xs: '2rem', md: '6rem' }}>
       <Grid
         container
         justifyContent={'space-between'}
@@ -29,6 +35,32 @@ const Footer = () => {
             A career transformation platform combining mentorship, applications, and analytics for
             measurable outcomes.
           </Typography>
+          <Box display="flex" gap={2} mt={2} flexWrap="wrap" alignItems="center">
+            <Link href={`tel:${SITE_PHONE_TEL}`} className="link-styles touch-target">
+              <Typography variant="body2" color="text.subText">
+                {SITE_PHONE_DISPLAY}
+              </Typography>
+            </Link>
+            <Link href={`mailto:${SUPPORT_EMAIL}`} className="link-styles touch-target">
+              <Typography variant="body2" color="text.subText">
+                {SUPPORT_EMAIL}
+              </Typography>
+            </Link>
+            {footerSocialLinks.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-styles touch-target"
+                aria-label={`Follow Surely Placed on ${item.label}`}
+              >
+                <Typography variant="body2" color="primary.main">
+                  {item.label}
+                </Typography>
+              </Link>
+            ))}
+          </Box>
         </Grid>
         <Grid
           size={{ xs: 12, sm: 5 }}
@@ -38,7 +70,7 @@ const Footer = () => {
           gap={2}
         >
           {navLinks.map((item, i) => (
-            <Link key={i} href={item.link} style={{ textDecoration: 'none' }}>
+            <Link key={i} href={item.link} style={{ textDecoration: 'none' }} className="touch-target">
               <Typography
                 fontSize={{ xs: '0.875rem', md: '1rem' }}
                 fontWeight={400}
@@ -93,18 +125,18 @@ const Footer = () => {
         >
           © {dayjs().year()} Surely Placed. All rights reserved.
         </Typography>
-        <Box display={'flex'} gap={1}>
-          <Link href={'/privacy-policy'} className="link-styles">
+        <Box display={'flex'} gap={1} flexWrap="wrap">
+          <Link href={'/privacy-policy'} className="link-styles touch-target">
             <Typography variant="body2" color="text">
               Privacy Policy
             </Typography>
           </Link>
-          <Link href={'/terms-and-conditions'} className="link-styles">
+          <Link href={'/terms-and-conditions'} className="link-styles touch-target">
             <Typography variant="body2" color="text">
               Terms of Service
             </Typography>
           </Link>
-          <Link href={'/refund-cancellation-policy'} className="link-styles">
+          <Link href={'/refund-cancellation-policy'} className="link-styles touch-target">
             <Typography variant="body2" color="text">
               Refund & Cancellation Policy
             </Typography>

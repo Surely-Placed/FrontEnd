@@ -7,7 +7,6 @@ import 'swiper/css';
 import { features } from '../../../mockData/HomePage';
 import Image from 'next/image';
 import CustomDivider from '@/common/CustomDivider';
-import Link from 'next/link';
 
 export const CardItem = ({ heading, desc, img, numericImg }) => (
   <Box
@@ -51,7 +50,7 @@ export const CardItem = ({ heading, desc, img, numericImg }) => (
       <Box width={'100%'} mb={2} sx={{ '&:hover': { mb: 0 } }}>
         <Image
           src={img}
-          alt="card-bg"
+          alt={`${heading} service illustration`}
           height={100}
           width={100}
           unoptimized
@@ -64,47 +63,31 @@ export const CardItem = ({ heading, desc, img, numericImg }) => (
       display={'flex'}
       borderRadius={'1.875rem'}
       flexDirection={'column'}
-      justifyContent={'space-between'}
+      justifyContent={'flex-end'}
       width={'100%'}
       height={'100%'}
       zIndex={2}
       top={0}
+      aria-hidden="true"
       sx={{
-        backgroundColor: 'background.hover',
         opacity: 0,
         transition: '0.5s ease-in-out',
-        backgroundColor: 'background.main',
         backgroundImage: "url('/HomePage/CardHoverBG.webp')",
         backgroundSize: 'cover',
         '&:hover': { opacity: 1 },
       }}
     >
-      <Box>
-        <Typography
-          component={'p'}
-          fontSize={{ xs: '0.875rem', sm: '1.5rem' }}
-          fontWeight={600}
-          m={{ xs: '2rem 1.75rem 1.5rem', md: '4rem 4rem 2.5rem' }}
-          color="extremes.light"
-          fontFamily={'var(--font-avantgarde), sans-serif'}
-        >
-          {heading}
-        </Typography>
-        <Typography
-          component={'p'}
-          fontSize={{ xs: '0.75rem', sm: '1rem' }}
-          color="extremes.light"
-          mx={{ xs: 2, md: 8 }}
-          textAlign={'center'}
-        >
-          {desc}
-        </Typography>
-      </Box>
       <Box width={'100%'} display={{ xs: 'none', md: 'flex' }} justifyContent={'flex-end'}>
-        <Image src={numericImg} alt="card-bg" height={201} width={165} unoptimized />
+        <Image
+          src={numericImg}
+          alt=""
+          height={201}
+          width={165}
+          unoptimized
+        />
       </Box>
       <Box width={'100%'} display={{ xs: 'flex', md: 'none' }} justifyContent={'flex-end'}>
-        <Image src={numericImg} alt="card-bg" height={141} width={95} unoptimized />
+        <Image src={numericImg} alt="" height={141} width={95} unoptimized />
       </Box>
     </Box>
   </Box>
@@ -141,22 +124,8 @@ const ExploreServices = () => {
               color="text"
               fontFamily={'var(--font-avantgarde), sans-serif'}
             >
-              Explore Our Core Services
+              Career Coaching Services That Drive Offers
             </Typography>
-            {/* <Link href={'/services'} className="link-styles">
-              <Button
-                variant="filled"
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'extremes.light',
-                  display: { xs: 'none', md: 'block' },
-                }}
-              >
-                <Typography variant="subtitle2_bold" color="extremes.light" mt={0.1}>
-                  View Services
-                </Typography>
-              </Button>
-            </Link> */}
           </Box>
           <Typography
             component={'p'}
@@ -167,26 +136,11 @@ const ExploreServices = () => {
             From resume review to placement guidance, every service is built to improve your
             results.
           </Typography>
-          {/* <Link href={'/services'} className="link-styles">
-            <Button
-              variant="filled"
-              sx={{
-                bgcolor: 'primary.main',
-                color: 'extremes.light',
-                display: { xs: 'block', md: 'none' },
-                mt: 2,
-              }}
-            >
-              <Typography variant="subtitle2_bold" color="extremes.light" mt={0.1}>
-                View Services
-              </Typography>
-            </Button>
-          </Link> */}
         </Box>
         <Box my={6} ml={{ xs: '1rem', md: '5rem' }}>
           <Swiper slidesPerView={isSmallScreen ? 1.5 : 2.5} spaceBetween={30} className="mySwiper">
             {features.map((feature, i) => (
-              <SwiperSlide style={{ color: 'background.default' }} key={i}>
+              <SwiperSlide style={{ color: 'background.default' }} key={feature.heading}>
                 <CardItem
                   heading={feature.heading}
                   desc={feature.desc}

@@ -6,34 +6,14 @@ import MeetOurCoaches from '@/components/BecomeCoach/MeetOurCoaches';
 import FAQ from '@/components/Homepage/FAQ';
 import FirstStep from '@/components/Homepage/FirstStep';
 import { desc, heading } from '../../../../mockData/BecomeMember';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: 'Become a Mentor | Coach Global Talent | Surely Placed',
   description:
-    'Explore career coaching opportunities with Surely Placed. Become a mentor and share expertise, guide learners, and grow your impact.',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://surelyplaced.com/become-mentor',
-  },
-  openGraph: {
-    url: 'https://surelyplaced.com/become-mentor',
-    title: 'Become a Mentor | Coach Global Talent | Surely Placed',
-    description:
-      'Explore career coaching opportunities with Surely Placed. Become a mentor and share expertise, guide learners, and grow your impact.',
-    type: 'website',
-    siteName: 'Surely Placed',
-    locale: 'en_US',
-  },
-  twitter: {
-    title: 'Become a Mentor | Coach Global Talent | Surely Placed',
-    description:
-      'Explore career coaching opportunities with Surely Placed. Become a mentor and share expertise, guide learners, and grow your impact.',
-    card: 'summary',
-  },
-};
+    'Apply to mentor with Surely Placed. Share your expertise, guide learners through structured cohorts, and help professionals land stronger offers globally.',
+  path: '/become-mentor',
+});
 
 const page = () => {
   return (

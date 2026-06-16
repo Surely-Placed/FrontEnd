@@ -97,9 +97,11 @@ const HeroBanner = () => {
         <Box display={{ xs: 'none', lg: 'block' }} height={'100%'}>
           <Image
             src={'/HomePage/HeroBanner.webp'}
-            alt="hero-banner"
-            width={100}
-            height={100}
+            alt="Career coaching hero banner with mentor-led interview preparation"
+            width={1401}
+            height={776}
+            priority
+            fetchPriority="high"
             unoptimized
             className="w_100 h_100"
             style={{ maxHeight: '100%' }}
@@ -108,9 +110,11 @@ const HeroBanner = () => {
         <Box display={{ xs: 'block', lg: 'none' }} height={'100%'}>
           <Image
             src={'/HomePage/HeroMob.webp'}
-            alt="hero-banner"
-            width={100}
-            height={100}
+            alt="Career coaching hero banner for mobile"
+            width={768}
+            height={1024}
+            priority
+            fetchPriority="high"
             unoptimized
             className="w_100 h_100"
             style={{ maxHeight: '100%' }}
@@ -147,8 +151,8 @@ const HeroBanner = () => {
               preparation into offers.
             </Typography>
             <Link href={'/book-a-call'} className="link-styles">
-              <Button variant="contained">
-                <Typography variant="subtitle2_bold" color="primary" mt={0.3}>
+              <Button variant="filled" sx={{ bgcolor: 'primary.main', color: 'extremes.light' }}>
+                <Typography variant="subtitle2_bold" color="extremes.light" mt={0.3}>
                   Book a Call
                 </Typography>
               </Button>

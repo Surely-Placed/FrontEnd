@@ -11,14 +11,16 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HomeManager } from '@/services/home/api';
 import { ExpandIcon } from '../../../public/images';
+import { getFallbackFaqs } from '../../../mockData/FAQ';
+import JsonLd from '@/components/seo/JsonLd';
+import { buildFaqSchema } from '@/lib/seo';
 
 const FAQ = ({ p = '0 1rem', category = 'Default' }) => {
   const [expandedIndex, setExpandedIndex] = useState(false);
   const [faqs, setFaqs] = useState([]);
-  const didFetchRef = useRef(false);
 
   const theme = useTheme();
   const isTabScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -28,92 +30,102 @@ const FAQ = ({ p = '0 1rem', category = 'Default' }) => {
   };
 
   useEffect(() => {
-    if (didFetchRef.current) return;
-    didFetchRef.current = true;
+    let active = true;
+
     (async () => {
       try {
         const res = await HomeManager.getFAQs(category);
         let dataArray = Array.isArray(res?.data) ? res.data : [];
-        dataArray = dataArray?.slice(0,7);
-        setFaqs(dataArray);
+        if (dataArray.length === 0) {
+          dataArray = getFallbackFaqs(category);
+        }
+        if (active) {
+          setFaqs(dataArray.slice(0, 7));
+        }
       } catch (e) {
-        setFaqs([]);
+        if (active) {
+          setFaqs(getFallbackFaqs(category).slice(0, 7));
+        }
       }
     })();
-  }, []);
+
+    return () => {
+      active = false;
+    };
+  }, [category]);
+
   return (
-    <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      whileInView={{ y: 0, opacity: 1 }}
-      viewport={{ once: true, amount: 0 }}
-      transition={{
-        duration: 1,
-        ease: 'easeOut',
-      }}
-    >
-      <Grid
-        container
-        alignItems={'center'}
-        mb={{ xs: '4rem', lg: '8rem' }}
-        spacing={{ xs: 2, lg: 0 }}
-        p={{ xs: '0 1rem', sm: p, lg: '0 5rem' }}
+    <>
+      {faqs.length > 0 && <JsonLd data={buildFaqSchema(faqs)} />}
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        viewport={{ once: true, amount: 0 }}
+        transition={{
+          duration: 1,
+          ease: 'easeOut',
+        }}
       >
         <Grid
-          size={{ xs: 12, lg: 6 }}
-          pr={{ xs: 0, lg: '4rem' }}
-          borderRight={{ xs: 'none', lg: '1px solid #E4E4E4' }}
+          container
+          alignItems={'center'}
+          mb={{ xs: '4rem', lg: '8rem' }}
+          spacing={{ xs: 2, lg: 0 }}
+          p={{ xs: '0 1rem', sm: p, lg: '0 5rem' }}
         >
-          <Box
-            position={'relative'}
-            borderRadius={'0.875rem'}
-            overflow={'hidden'}
-            height={{ xs: '140px', sm: '300px', lg: '100%' }}
-            minHeight={{ xs: 'unset', lg: '600px' }}
-            width={'100%'}
+          <Grid
+            size={{ xs: 12, lg: 6 }}
+            pr={{ xs: 0, lg: '4rem' }}
+            borderRight={{ xs: 'none', lg: '1px solid #E4E4E4' }}
           >
             <Box
-              position={'absolute'}
+              position={'relative'}
+              borderRadius={'0.875rem'}
+              overflow={'hidden'}
+              height={{ xs: '140px', sm: '300px', lg: '100%' }}
+              minHeight={{ xs: 'unset', lg: '600px' }}
               width={'100%'}
-              height={'100%'}
-              zIndex={1}
-              sx={{ backgroundColor: 'background.grey', opacity: 0.5 }}
-            />
-            <Typography
-            component={'h2'}
-              fontSize={{ xs: '1.5rem', sm: '2.5rem' }}
-              fontWeight={600}
-              color="extremes.light"
-              position={'absolute'}
-              top={{ xs: 'unset', lg: '30%' }}
-              left={{ xs: '10%', md: '5%', lg: '10%' }}
-              bottom={{ xs: '10%', lg: 'unset' }}
-              zIndex={1}
-              fontFamily={'var(--font-avantgarde), sans-serif'}
             >
-              Frequently Asked <br /> Questions
-            </Typography>
-            <Box width={'100%'} height={'100%'} display={{ xs: 'none', lg: 'block' }}>
-              <Image src={'/HomePage/faq.webp'} alt="faq" fill unoptimized />
-            </Box>
-            <Box width={'100%'} height={'100%'} display={{ xs: 'block', lg: 'none' }}>
-              <Image
-                src={'/HomePage/FAQMob.webp'}
-                alt="faq"
-                width={100}
-                height={300}
-                unoptimized
-                className="w_100 h_100"
+              <Box
+                position={'absolute'}
+                width={'100%'}
+                height={'100%'}
+                zIndex={1}
+                sx={{ backgroundColor: 'background.grey', opacity: 0.5 }}
               />
+              <Typography
+                component={'h2'}
+                fontSize={{ xs: '1.5rem', sm: '2.5rem' }}
+                fontWeight={600}
+                color="extremes.light"
+                position={'absolute'}
+                top={{ xs: 'unset', lg: '30%' }}
+                left={{ xs: '10%', md: '5%', lg: '10%' }}
+                bottom={{ xs: '10%', lg: 'unset' }}
+                zIndex={1}
+                fontFamily={'var(--font-avantgarde), sans-serif'}
+              >
+                Frequently Asked <br /> Questions
+              </Typography>
+              <Box width={'100%'} height={'100%'} display={{ xs: 'none', lg: 'block' }}>
+                <Image src={'/HomePage/faq.webp'} alt="Frequently asked questions section" fill unoptimized />
+              </Box>
+              <Box width={'100%'} height={'100%'} display={{ xs: 'block', lg: 'none' }}>
+                <Image
+                  src={'/HomePage/FAQMob.webp'}
+                  alt="Frequently asked questions section"
+                  width={100}
+                  height={300}
+                  unoptimized
+                  className="w_100 h_100"
+                />
+              </Box>
             </Box>
-          </Box>
-        </Grid>
-        <Grid size={{ xs: 12, lg: 6 }} pl={{ xs: 0, lg: '4rem' }}>
-          {faqs.length === 0 ? (
-            <Typography color="text.subText">No FAQs available.</Typography>
-          ) : (
-            faqs.map((faq, i) => (
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }} pl={{ xs: 0, lg: '4rem' }}>
+            {faqs.map((faq, i) => (
               <motion.div
-                key={i}
+                key={faq.question}
                 initial={{
                   opacity: 0,
                   y: 40,
@@ -125,7 +137,6 @@ const FAQ = ({ p = '0 1rem', category = 'Default' }) => {
                 style={{ borderBottom: '1px solid #E4E4E4' }}
               >
                 <Accordion
-                  key={i}
                   elevation={0}
                   expanded={expandedIndex === i}
                   onChange={handleChange(i)}
@@ -138,9 +149,10 @@ const FAQ = ({ p = '0 1rem', category = 'Default' }) => {
                       padding: { xs: '1rem 0', lg: '2rem 0' },
                     }}
                     expandIcon={<ExpandIcon size={isTabScreen ? 24 : 32} />}
+                    aria-label={`Expand answer for ${faq.question}`}
                   >
                     <Typography
-                    component={'h3'}
+                      component={'h3'}
                       fontWeight={500}
                       fontSize={{ xs: '0.875rem', sm: '1rem' }}
                       color="text"
@@ -159,11 +171,11 @@ const FAQ = ({ p = '0 1rem', category = 'Default' }) => {
                   </AccordionDetails>
                 </Accordion>
               </motion.div>
-            ))
-          )}
+            ))}
+          </Grid>
         </Grid>
-      </Grid>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

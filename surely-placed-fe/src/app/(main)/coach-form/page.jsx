@@ -2,34 +2,14 @@ import CoachForm from '@/components/CoachForm/CoachForm';
 import HeroContainer from '@/components/CoachForm/HeroContainer';
 import FirstStep from '@/components/Homepage/FirstStep';
 import { desc, heading } from '../../../../mockData/BecomeMember';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: 'Mentor Application Form | Join Our Coaches | Surely Placed',
   description:
-    'Join our career mentorship network. Complete the mentor application and start guiding learners worldwide with flexibility and support.',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://surelyplaced.com/coach-form',
-  },
-  openGraph: {
-    url: 'https://surelyplaced.com/coach-form',
-    title: 'Mentor Application Form | Join Our Coaches | Surely Placed',
-    description:
-      'Join our career mentorship network. Complete the mentor application and start guiding learners worldwide with flexibility and support.',
-    type: 'website',
-    siteName: 'Surely Placed',
-    locale: 'en_US',
-  },
-  twitter: {
-    title: 'Mentor Application Form | Join Our Coaches | Surely Placed',
-    description:
-      'Join our career mentorship network. Complete the mentor application and start guiding learners worldwide with flexibility and support.',
-    card: 'summary',
-  },
-};
+    'Complete the Surely Placed mentor application to join our coaching network and support learners with structured mentorship, interview prep, and career guidance.',
+  path: '/coach-form',
+});
 
 const page = () => {
   return (

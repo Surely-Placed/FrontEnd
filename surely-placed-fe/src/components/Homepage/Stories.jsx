@@ -8,10 +8,19 @@ import 'swiper/css';
 import Image from 'next/image';
 import { HomeManager } from '@/services/home/api';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { LinkedInIcon } from '../../../public/images';
+import { studentStories } from '../../../mockData/HomePage';
 
-export const CardItem = ({ comment, profile, name, designation, isCurr, linkedin_url }) => (
+const mapStoryToCard = (item) => ({
+  story: item.story || item.comment,
+  image: item.image || item.profile,
+  student_name: item.student_name || item.name,
+  student_designation: item.student_designation || item.designation,
+  linkedin_url: item.linkedin_url,
+});
+
+const fallbackStories = studentStories.map(mapStoryToCard);
+
+export const CardItem = ({ comment, profile, name, designation, isCurr }) => (
   <Box
     p={{ xs: '1rem', lg: '1.75rem' }}
     border={'1px solid #91E4DD'}
@@ -38,7 +47,7 @@ export const CardItem = ({ comment, profile, name, designation, isCurr, linkedin
         <Box width={'60px'} height={'60px'} borderRadius={'50%'} overflow={'hidden'}>
           <Image
             src={profile}
-            alt="profile"
+            alt={`${name} profile`}
             width={60}
             height={60}
             unoptimized
@@ -55,28 +64,18 @@ export const CardItem = ({ comment, profile, name, designation, isCurr, linkedin
           >
             {name}
           </Typography>
-          <Typography
-            component={'p'}
-            variant="body2"
-            color="text.dark"
-            textTransform={'capitalize'}
-          >
+          <Typography component={'p'} variant="body2" color="text.dark" textTransform={'capitalize'}>
             {designation}
           </Typography>
         </Box>
       </Box>
-      {/* {linkedin_url && (
-        <Link href={linkedin_url} target="_blank" rel="noopener noreferrer" className='link_styles'>
-          <LinkedInIcon />
-        </Link>
-      )} */}
     </Box>
   </Box>
 );
 
 const Stories = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [storiesData, setStoriesData] = useState([]);
+  const [storiesData, setStoriesData] = useState(fallbackStories);
   const didFetchRef = useRef(false);
   const theme = useTheme();
   const isLargestScreen = useMediaQuery(theme.breakpoints.down('xl'));
@@ -84,19 +83,24 @@ const Stories = () => {
   const isTabScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
-    if (didFetchRef.current) return; // guard against React Strict Mode double-invoke
+    if (didFetchRef.current) return;
     didFetchRef.current = true;
 
     (async () => {
       try {
         const stories = await HomeManager.getStudentStories();
         const dataArray = Array.isArray(stories?.data) ? stories.data : [];
-        setStoriesData(dataArray);
+        if (dataArray.length > 0) {
+          setStoriesData(dataArray);
+        }
       } catch (e) {
-        setStoriesData([]);
+        setStoriesData(fallbackStories);
       }
     })();
   }, []);
+
+  const slides =
+    storiesData.length < 4 ? Array(4).fill(storiesData).flat().slice(0, 8) : storiesData;
 
   return (
     <motion.div
@@ -146,34 +150,31 @@ const Stories = () => {
             modules={[Autoplay]}
             className="mySwiper custom-swiper"
           >
-            {(storiesData.length < 4 ? Array(4).fill(storiesData).flat() : storiesData).map(
-              (item, i) => {
-                const isCurr = activeIndex === i;
-                return (
-                  <SwiperSlide
-                    style={{
-                      color: 'background.default',
-                      display: 'flex',
-                      height: 'auto',
-                      padding: isCurr ? '1.75rem 0.75rem' : '3rem 0',
-                      backgroundImage: isCurr ? "url('/HomePage/frame.webp')" : 'unset',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '100% 100%',
-                    }}
-                    key={i}
-                  >
-                    <CardItem
-                      comment={item.story}
-                      profile={item.image}
-                      name={item.student_name}
-                      designation={item.student_designation}
-                      isCurr={isCurr}
-                      linkedin_url={item.linkedin_url}
-                    />
-                  </SwiperSlide>
-                );
-              }
-            )}
+            {slides.map((item, i) => {
+              const isCurr = activeIndex === i;
+              return (
+                <SwiperSlide
+                  style={{
+                    color: 'background.default',
+                    display: 'flex',
+                    height: 'auto',
+                    padding: isCurr ? '1.75rem 0.75rem' : '3rem 0',
+                    backgroundImage: isCurr ? "url('/HomePage/frame.webp')" : 'unset',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '100% 100%',
+                  }}
+                  key={`${item.student_name || item.name}-${i}`}
+                >
+                  <CardItem
+                    comment={item.story || item.comment}
+                    profile={item.image || item.profile}
+                    name={item.student_name || item.name}
+                    designation={item.student_designation || item.designation}
+                    isCurr={isCurr}
+                  />
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         </Box>
       </Box>

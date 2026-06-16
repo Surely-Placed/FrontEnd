@@ -2,10 +2,23 @@ import React from 'react';
 import Link from 'next/link';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import { careersApplyLink, careersIntro } from '../../../mockData/Careers';
+import JsonLd from '@/components/seo/JsonLd';
+import { buildBreadcrumbSchema } from '@/lib/seo';
+import { getCareerSlug } from '../../../mockData/Careers';
 
 const CareerDetailsPage = ({ job }) => {
+  const slug = getCareerSlug(job.title);
+
   return (
-    <Box
+    <>
+      <JsonLd
+        data={buildBreadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Careers', path: '/careers' },
+          { name: job.title, path: `/careers/${slug}` },
+        ])}
+      />
+      <Box
       sx={{
         maxWidth: 1200,
         mx: 'auto',
@@ -104,6 +117,7 @@ const CareerDetailsPage = ({ job }) => {
         </Button>
       </Link>
     </Box>
+    </>
   );
 };
 

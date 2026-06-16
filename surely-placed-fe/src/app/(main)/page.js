@@ -7,34 +7,14 @@ import FAQ from '@/components/Homepage/FAQ';
 
 import { Box } from '@mui/material';
 import FirstStep from '@/components/Homepage/FirstStep';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: 'Career Coaching with Interview Analytics | Surely Placed',
   description:
-    'Move from rejections to offers with data-backed career coaching, interview analytics, and expert guidance. Book a call with Surely Placed.',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://surelyplaced.com/',
-  },
-  openGraph: {
-    url: 'https://surelyplaced.com/',
-    title: 'Career Coaching with Interview Analytics | Surely Placed',
-    description:
-      'Move from rejections to offers with data-backed career coaching, interview analytics, and expert guidance. Book a call with Surely Placed.',
-    type: 'website',
-    siteName: 'Surely Placed',
-    locale: 'en_US',
-  },
-  twitter: {
-    title: 'Career Coaching with Interview Analytics | Surely Placed',
-    description:
-      'Move from rejections to offers with data-backed career coaching, interview analytics, and expert guidance. Book a call with Surely Placed.',
-    card: 'summary',
-  },
-};
+    'Move from rejections to offers with data-backed career coaching, mentor-led cohorts, application support, and interview analytics. Book a strategy call with Surely Placed today.',
+  path: '/',
+});
 
 export default function Home() {
   return (

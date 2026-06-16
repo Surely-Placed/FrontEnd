@@ -7,34 +7,14 @@ import StoryHeroBanner from '@/components/OurStory/StoryHeroBanner';
 import Team from '@/components/OurStory/Team';
 import React from 'react';
 import { chooseUsDetails } from '../../../../mockData/OurStory';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata = {
+export const metadata = buildPageMetadata({
   title: 'The Surely Placed Story | Career Transformation Platform',
   description:
-    'Discover the story behind Surely Placed and our mission to make career success structured, global, and predictable. Learn more.',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: 'https://surelyplaced.com/our-story',
-  },
-  openGraph: {
-    url: 'https://surelyplaced.com/our-story',
-    title: 'The Surely Placed Story | Career Transformation Platform',
-    description:
-      'Discover the story behind Surely Placed and our mission to make career success structured, global, and predictable. Learn more.',
-    type: 'website',
-    siteName: 'Surely Placed',
-    locale: 'en_US',
-  },
-  twitter: {
-    title: 'The Surely Placed Story | Career Transformation Platform',
-    description:
-      'Discover the story behind Surely Placed and our mission to make career success structured, global, and predictable. Learn more.',
-    card: 'summary',
-  },
-};
+    'Discover how Surely Placed is building a structured path from ambition to opportunity with mentorship, application support, and analytics for measurable career outcomes.',
+  path: '/our-story',
+});
 
 const page = () => {
   return (

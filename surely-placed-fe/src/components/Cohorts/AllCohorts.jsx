@@ -106,7 +106,7 @@ const AllCohorts = () => {
             backgroundColor: 'customBlue.secondary',
           }}
         >
-          <IconButton ref={filterRef} onClick={handleOpen}>
+          <IconButton ref={filterRef} onClick={handleOpen} aria-label="Open cohort filters">
             <FilterIcon />
           </IconButton>
           <FilterModal

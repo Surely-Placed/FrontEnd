@@ -1,4 +1,3 @@
-import Profile from '@/components/Profile/Profile';
 import {
   CallIcon,
   CohortIcon,
@@ -7,8 +6,6 @@ import {
   ProfileIcon,
   SupportIcon,
 } from '../../public/images';
-import MyCohorts from '@/components/Profile/MyCohorts';
-import Support from '@/components/Profile/Support';
 
 export const sideBarLinks = [
   { icon: ProfileIcon, text: 'My Profile' },
@@ -50,14 +47,16 @@ export const myCohorts = [
 export const contactInfo = [
   {
     icon: <MailIcon fill="#E6F7F5" color="#38BDB1" width={32} height={32} />,
-    text: "contact@company.com",
+    text: 'support@surelyplaced.com',
+    href: 'mailto:support@surelyplaced.com',
   },
   {
     icon: <CallIcon fill="#E6F7F5" color="#38BDB1" width={32} height={32} />,
-    text: "+1 234 567 890",
+    text: '+1 (917) 755-0774',
+    href: 'tel:+19177550774',
   },
   {
     icon: <SupportIcon fill="#E6F7F5" color="#38BDB1" width={32} height={32} />,
-    text: "Support",
+    text: 'Support',
   },
 ];

@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { contactInfo } from '../../../mockData/Profile';
+import { SUPPORT_EMAIL, SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from '@/config/site';
 import { useForm } from 'react-hook-form';
 import CustomTextField from '@/common/CustomTextField';
 import Link from 'next/link';
@@ -105,9 +106,17 @@ const Support = () => {
           <Box key={i} display={'flex'} gap={3} alignItems={'center'}>
             <Box display={'flex'} gap={1} alignItems={'center'}>
               {item.icon}
-              <Typography variant="body1" color="text.subText" mt={0.5}>
-                {item.text}
-              </Typography>
+              {item.href ? (
+                <Link href={item.href} className="link-styles">
+                  <Typography variant="body1" color="text.subText" mt={0.5}>
+                    {item.text}
+                  </Typography>
+                </Link>
+              ) : (
+                <Typography variant="body1" color="text.subText" mt={0.5}>
+                  {item.text}
+                </Typography>
+              )}
             </Box>
             <Typography
               variant="body1"
@@ -171,9 +180,15 @@ const Support = () => {
           </Typography>
           <Typography component={'span'} variant="body1" color="text.subText" mb={2}>
             Say hi to{' '}
-            <Link href={'contact@company.com'}>
+            <Link href={`mailto:${SUPPORT_EMAIL}`}>
               <Typography component={'span'} variant="body1" color="primary" mb={2}>
-                contact@company.com
+                {SUPPORT_EMAIL}
+              </Typography>
+            </Link>{' '}
+            or call{' '}
+            <Link href={`tel:${SITE_PHONE_TEL}`}>
+              <Typography component={'span'} variant="body1" color="primary" mb={2}>
+                {SITE_PHONE_DISPLAY}
               </Typography>
             </Link>
           </Typography>
