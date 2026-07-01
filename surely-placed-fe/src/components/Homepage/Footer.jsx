@@ -5,7 +5,8 @@ import { navLinks } from '../../../mockData/navbar';
 import Link from 'next/link';
 import { contactInfo } from '../../../mockData/Profile';
 import { footerInfo } from '../../../mockData/footer';
-import { SOCIAL_LINKS, SITE_PHONE_DISPLAY, SITE_PHONE_TEL, SUPPORT_EMAIL } from '@/config/site';
+import { SOCIAL_LINKS, SUPPORT_EMAIL } from '@/config/site';
+import ContactPhones from '@/components/common/ContactPhones';
 import dayjs from 'dayjs';
 
 const footerSocialLinks = [
@@ -36,11 +37,7 @@ const Footer = () => {
             measurable outcomes.
           </Typography>
           <Box display="flex" gap={2} mt={2} flexWrap="wrap" alignItems="center">
-            <Link href={`tel:${SITE_PHONE_TEL}`} className="link-styles touch-target">
-              <Typography variant="body2" color="text.subText">
-                {SITE_PHONE_DISPLAY}
-              </Typography>
-            </Link>
+            <ContactPhones className="link-styles touch-target" />
             <Link href={`mailto:${SUPPORT_EMAIL}`} className="link-styles touch-target">
               <Typography variant="body2" color="text.subText">
                 {SUPPORT_EMAIL}

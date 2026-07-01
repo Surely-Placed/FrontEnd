@@ -5,6 +5,7 @@ import TitleContent from '@/common/TitleContent';
 import SubtitleContent from '@/common/SubtitleContent';
 import BulletContent from '@/common/BulletContent';
 import SubContent from '@/common/SubContent';
+import ContactPhones from '@/components/common/ContactPhones';
 import {
   policyScope,
   informationProvided,
@@ -233,7 +234,7 @@ const PrivacyPolicy = () => {
           <>
             <strong>Email:</strong> support@surelyplaced.com
             <br />
-            <strong>Phone:</strong> +1 (917) 755-0774
+            <strong>Phone:</strong> <ContactPhones variant="subtitle1" color="text.subText" separator=", " />
           </>
         }
       />

@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { contactInfo } from '../../../mockData/Profile';
-import { SUPPORT_EMAIL, SITE_PHONE_DISPLAY, SITE_PHONE_TEL } from '@/config/site';
+import { SUPPORT_EMAIL } from '@/config/site';
+import ContactPhones from '@/components/common/ContactPhones';
 import { useForm } from 'react-hook-form';
 import CustomTextField from '@/common/CustomTextField';
 import Link from 'next/link';
@@ -185,12 +186,7 @@ const Support = () => {
                 {SUPPORT_EMAIL}
               </Typography>
             </Link>{' '}
-            or call{' '}
-            <Link href={`tel:${SITE_PHONE_TEL}`}>
-              <Typography component={'span'} variant="body1" color="primary" mb={2}>
-                {SITE_PHONE_DISPLAY}
-              </Typography>
-            </Link>
+            or call <ContactPhones variant="body1" color="primary" />
           </Typography>
         </Grid>
         <Grid size={{ xs: 12, lg: 7 }} pl={{ xs: 0, lg: '4rem' }}>

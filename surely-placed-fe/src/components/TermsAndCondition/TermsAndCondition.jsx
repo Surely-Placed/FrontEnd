@@ -4,6 +4,7 @@ import { Box, Typography } from '@mui/material';
 import TitleContent from '@/common/TitleContent';
 import SubtitleContent from '@/common/SubtitleContent';
 import BulletContent from '@/common/BulletContent';
+import ContactPhones from '@/components/common/ContactPhones';
 import {
   termsServicesOverview,
   userResponsibilities,
@@ -131,7 +132,7 @@ const TermsAndCondition = () => {
           <>
             <strong>Email:</strong> support@surelyplaced.com
             <br />
-            <strong>Phone:</strong> +1 (917) 755-0774
+            <strong>Phone:</strong> <ContactPhones variant="subtitle1" color="text.subText" separator=", " />
           </>
         }
       />
