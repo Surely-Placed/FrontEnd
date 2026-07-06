@@ -56,31 +56,58 @@ export const WEBINAR_TESTIMONIALS = [
   },
 ];
 
-export const WEBINAR_MODULES = [
+export const WEBINAR_WALKAWAY_SECTIONS = [
   {
-    n: 'MODULE 1',
-    title: "Understanding today's hiring market",
-    items: ['Tech hiring trends', "AI's impact on hiring", 'Most in-demand skills', 'What the market expects'],
-  },
-  {
-    n: 'MODULE 2',
-    title: 'Cracking technical interviews',
-    items: [
-      'Resume & LinkedIn optimization',
-      'GitHub best practices',
-      'Coding assessments & DSA prep',
-      'Technical, HR & system design rounds',
+    label: '01',
+    title: 'Understand How Companies Actually Hire for Tech Roles Today',
+    intro:
+      'The tech job market has changed dramatically, and applying the same way you did a year ago simply does not work anymore. During this webinar, you will discover:',
+    bullets: [
+      'What recruiters and hiring managers actually look for',
+      'Why qualified candidates are not getting interview calls',
+      'How AI is reshaping hiring across tech roles',
+      'The biggest hiring trends that will define the next few years',
     ],
   },
   {
-    n: 'MODULE 3',
-    title: 'Becoming AI-ready',
-    items: ['Generative AI & coding assistants', 'AI agents', 'Building AI projects', 'Future career opportunities'],
+    label: '02',
+    title: 'Learn How to Stand Out and Get More Interview Calls',
+    intro:
+      'Getting interviews is not about sending more applications—it is about presenting yourself the right way. We will show you how to:',
+    bullets: [
+      'Build a resume that gets shortlisted',
+      'Optimize your LinkedIn and GitHub profile',
+      'Navigate ATS systems with confidence',
+      'Apply strategically instead of blindly sending hundreds of applications',
+      'Position yourself as a stronger candidate for today’s competitive tech job market',
+    ],
   },
   {
-    n: 'MODULE 4',
-    title: 'Your career roadmap',
-    items: ['30 / 60 / 90-day plans', 'Curated resources', 'Job application strategy'],
+    label: '03',
+    title: 'Master the Interview Process with Confidence',
+    intro:
+      'Whether you are interviewing for Software Development, Data, Cloud, AI, QA, Cybersecurity, DevOps, or other tech roles, you will understand what companies expect at every stage of the hiring journey. You will gain insights into:',
+    bullets: [
+      'Online coding assessments and technical evaluations',
+      'Technical interview strategies and problem-solving approaches',
+      'HR and behavioral interviews',
+      'The most common mistakes candidates make—and how to avoid them',
+      'Practical techniques to improve your interview performance and confidence',
+    ],
+  },
+  {
+    label: '04',
+    title: 'Leave with a Clear Roadmap to Land Your Next Tech Role',
+    intro:
+      'Stop jumping between random YouTube videos, blogs, and conflicting advice. You will leave with a structured action plan that tells you exactly what to focus on—and what to ignore. Plus, you will receive:',
+    bullets: [
+      'Surely Placed Career Playbook',
+      '30-60-90 Day Career Roadmap',
+      'Resume and LinkedIn Optimization Checklists',
+      'AI Learning Resources',
+      'Job Application Tracker',
+      'Curated Interview Preparation and Practice Resources',
+    ],
   },
 ];
 

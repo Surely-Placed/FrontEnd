@@ -30,7 +30,7 @@ import { ExpandIcon } from '../../../public/images';
 import {
   WEBINAR_FAQS,
   WEBINAR_TESTIMONIALS,
-  WEBINAR_MODULES,
+  WEBINAR_WALKAWAY_SECTIONS,
   WEBINAR_AUDIENCE_PILLS,
   WEBINAR_COUNTRY_OPTIONS,
   WEBINAR_STATUS_OPTIONS,
@@ -73,6 +73,94 @@ const bodySx = {
   lineHeight: 1.6,
 };
 
+const ctaKeyframes = {
+  '@keyframes ctaShimmer': {
+    '0%': { transform: 'translateX(-200%) skewX(-25deg)', opacity: 0 },
+    '10%': { opacity: 1 },
+    '45%': { transform: 'translateX(220%) skewX(-25deg)', opacity: 1 },
+    '55%': { opacity: 0 },
+    '100%': { transform: 'translateX(220%) skewX(-25deg)', opacity: 0 },
+  },
+};
+
+const withCtaShimmer = (gradient) => ({
+  ...ctaKeyframes,
+  position: 'relative',
+  overflow: 'hidden',
+  isolation: 'isolate',
+  '& > *': {
+    position: 'relative',
+    zIndex: 1,
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '-15%',
+    left: 0,
+    width: '65%',
+    height: '130%',
+    background: gradient,
+    transform: 'translateX(-200%) skewX(-25deg)',
+    animation: 'ctaShimmer 5s ease-in-out infinite',
+    pointerEvents: 'none',
+    zIndex: 0,
+    filter: 'blur(0.5px)',
+  },
+});
+
+const primaryShimmerGradient =
+  'linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.2) 18%, rgba(255,255,255,0.95) 48%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.95) 52%, rgba(255,255,255,0.2) 82%, transparent 100%)';
+
+const secondaryShimmerGradient =
+  'linear-gradient(105deg, transparent 0%, rgba(40,87,196,0.15) 18%, rgba(255,255,255,0.95) 48%, rgba(120,160,255,0.85) 50%, rgba(255,255,255,0.95) 52%, rgba(40,87,196,0.2) 82%, transparent 100%)';
+
+const primaryCtaSx = {
+  ...withCtaShimmer(primaryShimmerGradient),
+  bgcolor: 'primary.main',
+  color: '#fff !important',
+  px: { xs: 3, md: 4 },
+  py: 1.5,
+  borderRadius: '0.75rem',
+  boxShadow: '0 8px 28px rgba(40, 87, 196, 0.45), inset 0 1px 0 rgba(255,255,255,0.2)',
+  fontFamily: 'var(--font-avantgarde), sans-serif',
+  fontWeight: 700,
+  fontSize: { xs: '0.95rem', sm: '1.05rem' },
+  letterSpacing: '0.02em',
+  textTransform: 'none',
+  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  '&:hover': {
+    bgcolor: 'primary.main',
+    color: '#fff !important',
+    boxShadow: '0 12px 28px rgba(40, 87, 196, 0.45)',
+    transform: 'translateY(-2px)',
+  },
+};
+
+const secondaryCtaSx = {
+  ...withCtaShimmer(secondaryShimmerGradient),
+  minWidth: { xs: '100%', sm: 220 },
+  px: { xs: 3, md: 4 },
+  py: 1.5,
+  borderRadius: '0.75rem',
+  bgcolor: '#fff !important',
+  color: '#292929 !important',
+  border: '2px solid',
+  borderColor: 'primary.main',
+  boxShadow: '0 6px 22px rgba(40, 87, 196, 0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
+  fontFamily: 'var(--font-avantgarde), sans-serif',
+  fontWeight: 700,
+  fontSize: { xs: '0.95rem', sm: '1.05rem' },
+  letterSpacing: '0.02em',
+  textTransform: 'none',
+  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+  '&:hover': {
+    bgcolor: '#fff !important',
+    color: '#292929 !important',
+    boxShadow: '0 8px 20px rgba(40, 87, 196, 0.2)',
+    transform: 'translateY(-2px)',
+  },
+};
+
 const sectionMotion = {
   initial: { y: 80, opacity: 0 },
   whileInView: { y: 0, opacity: 1 },
@@ -92,6 +180,7 @@ const AnimatedItem = ({ children, delay = 0, sx }) => (
     whileInView={{ y: 0, opacity: 1 }}
     viewport={{ once: true, amount: 0.2 }}
     transition={{ duration: 0.6, delay, ease: 'easeOut' }}
+    style={{ height: sx?.height === '100%' ? '100%' : 'auto', width: '100%' }}
   >
     <Box sx={sx}>{children}</Box>
   </motion.div>
@@ -273,12 +362,11 @@ const WebinarPage = ({
   const reserveButton = (fullWidth = false) => (
     <Button
       variant="filled"
+      disableElevation
       onClick={openCheckout}
-      sx={{ bgcolor: 'primary.main', color: 'extremes.light', width: fullWidth ? '100%' : 'auto' }}
+      sx={{ ...primaryCtaSx, width: fullWidth ? '100%' : 'auto' }}
     >
-      <Typography variant="subtitle2_bold" color="extremes.light" mt={0.1}>
-        Reserve My Seat for {priceLabel}
-      </Typography>
+      Reserve My Seat — {priceLabel}
     </Button>
   );
 
@@ -436,20 +524,27 @@ const WebinarPage = ({
         <Box>{reserveButton()}</Box>
       </AnimatedSection>
 
-      {/* Modules */}
+      {/* Walk away */}
       <AnimatedSection sx={sectionSx}>
-        <CustomDivider text={"What You'll Learn"} />
-        <Typography component="h2" sx={{ ...headingSx, mt: 2, mb: 4 }}>
-          Four modules. One clear system.
+        <CustomDivider text={"What You'll Walk Away With"} />
+        <Typography component="h2" sx={{ ...headingSx, mt: 2, mb: 2 }}>
+          A complete system for today&apos;s tech hiring market
         </Typography>
-        <Grid container spacing={2.5}>
-          {WEBINAR_MODULES.map((mod, index) => (
-            <Grid key={mod.n} size={{ xs: 12, sm: 6, md: 3 }}>
-              <AnimatedItem delay={index * 0.1}>
+        <Typography color="text.subText" sx={{ ...bodySx, mb: 4, maxWidth: 800 }}>
+          One live session covering how companies hire, how to stand out, how to interview with
+          confidence, and the exact roadmap and resources to land your next tech role.
+        </Typography>
+
+        <Grid container spacing={2.5} alignItems="stretch">
+          {WEBINAR_WALKAWAY_SECTIONS.map((section, index) => (
+            <Grid key={section.label} size={{ xs: 12, md: 6 }} sx={{ display: 'flex' }}>
+              <AnimatedItem delay={index * 0.08} sx={{ width: '100%', height: '100%' }}>
                 <Box
                   sx={{
-                    p: 3,
+                    p: { xs: 2.5, md: 3 },
                     height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
                     borderRadius: '1rem',
                     border: '1px solid',
                     borderColor: '#D8E1F4',
@@ -457,14 +552,32 @@ const WebinarPage = ({
                   }}
                 >
                   <Typography variant="subtitle2_bold" color="secondary.main" mb={1}>
-                    {mod.n}
+                    {section.label}
                   </Typography>
-                  <Typography component="h3" variant="h6" mb={1.5}>
-                    {mod.title}
+                  <Typography
+                    component="h3"
+                    fontFamily={'var(--font-avantgarde), sans-serif'}
+                    fontWeight={600}
+                    fontSize={{ xs: '1.1rem', sm: '1.25rem' }}
+                    color="text"
+                    mb={1.5}
+                    lineHeight={1.35}
+                  >
+                    {section.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.subText" mb={1.5} lineHeight={1.65}>
+                    {section.intro}
                   </Typography>
                   <Box component="ul" sx={{ pl: 2.5, m: 0 }}>
-                    {mod.items.map((item) => (
-                      <Typography component="li" key={item} variant="body2" color="text.subText" mb={0.5}>
+                    {section.bullets.map((item) => (
+                      <Typography
+                        component="li"
+                        key={item}
+                        variant="body2"
+                        color="text.subText"
+                        mb={0.75}
+                        lineHeight={1.6}
+                      >
                         {item}
                       </Typography>
                     ))}
@@ -557,7 +670,7 @@ const WebinarPage = ({
               }}
             >
               <Image
-                src="/dhiraj.jpeg"
+                src="/dh.jpeg"
                 alt="Dhiraj Kumar Jain, webinar instructor"
                 width={280}
                 height={350}
@@ -595,14 +708,16 @@ const WebinarPage = ({
         <Typography component="h2" sx={{ ...headingSx, mb: 3 }}>
           Success stories
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} alignItems="stretch">
           {WEBINAR_TESTIMONIALS.map((t, index) => (
-            <Grid key={t.name} size={{ xs: 12, md: 4 }}>
-              <AnimatedItem delay={index * 0.12}>
+            <Grid key={t.name} size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
+              <AnimatedItem delay={index * 0.12} sx={{ width: '100%', height: '100%' }}>
                 <Box
                   sx={{
                     p: 2.5,
                     height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
                     borderRadius: '0.5rem',
                     border: '1px solid #91E4DD',
                     bgcolor: 'customGreen.main',
@@ -611,7 +726,7 @@ const WebinarPage = ({
                   <Typography variant="body2" color="text.dark" mb={2}>
                     {t.quote}
                   </Typography>
-                  <Box display="flex" alignItems="center" gap={1.5}>
+                  <Box display="flex" alignItems="center" gap={1.5} sx={{ mt: 'auto', pt: 2 }}>
                     <Box
                       sx={{
                         width: 44,
@@ -712,20 +827,9 @@ const WebinarPage = ({
             alignItems="center"
           >
             {reserveButton()}
-            <Link href="/book-a-call" className="link-styles">
-              <Button
-                variant="contained"
-                sx={{
-                  minWidth: { xs: '100%', sm: 220 },
-                  p: { xs: '0.75rem 1.5rem', sm: '0.75rem 2rem' },
-                  bgcolor: 'extremes.light',
-                  color: 'text',
-                  '&:hover': { bgcolor: 'extremes.light', opacity: 0.92 },
-                }}
-              >
-                <Typography variant="subtitle2_bold" color="text" mt={0.25}>
-                  Book a Call
-                </Typography>
+            <Link href="/book-a-call" className="link-styles" style={{ color: 'inherit' }}>
+              <Button variant="contained" disableElevation sx={secondaryCtaSx}>
+                Book a Call
               </Button>
             </Link>
           </Stack>
@@ -759,10 +863,8 @@ const WebinarPage = ({
               {seatsLeft} seats left
             </Typography>
           </Box>
-          <Button variant="filled" onClick={openCheckout} sx={{ bgcolor: 'primary.main', color: 'extremes.light' }}>
-            <Typography variant="subtitle2_bold" color="extremes.light" mt={0.1}>
-              Reserve · {priceLabel}
-            </Typography>
+          <Button variant="filled" onClick={openCheckout} sx={primaryCtaSx}>
+            Reserve · {priceLabel}
           </Button>
         </Box>
       )}
@@ -883,14 +985,12 @@ const WebinarPage = ({
               fullWidth
               disabled={checkoutLoading}
               onClick={submitRegistration}
-              sx={{ bgcolor: 'primary.main', color: 'extremes.light' }}
+              sx={primaryCtaSx}
             >
               {checkoutLoading ? (
                 <CircularProgress size={24} sx={{ color: 'extremes.light' }} />
               ) : (
-                <Typography variant="subtitle2_bold" color="extremes.light" mt={0.1}>
-                  Continue to Payment · {priceLabel}
-                </Typography>
+                `Continue to Payment — ${priceLabel}`
               )}
             </Button>
             <Typography variant="caption" color="text.subText" textAlign="center">
@@ -925,10 +1025,8 @@ const WebinarPage = ({
               </Typography>
             ))}
           </Box>
-          <Button variant="filled" onClick={() => setSuccess(false)} sx={{ bgcolor: 'primary.main', color: 'extremes.light' }}>
-            <Typography variant="subtitle2_bold" color="extremes.light" mt={0.1}>
-              Back to the Page
-            </Typography>
+          <Button variant="filled" onClick={() => setSuccess(false)} sx={primaryCtaSx}>
+            Back to the Page
           </Button>
         </DialogContent>
       </Dialog>
