@@ -4,12 +4,12 @@ export const navLinks = [
   //   link: '/services',
   // },
   {
-    text: 'Webinar',
-    link: '/webinar',
-  },
-  {
     text: 'Meet Cohorts',
     link: '/meet-cohorts',
+  },
+  {
+    text: 'Webinar',
+    link: '/webinar',
   },
   {
     text: 'Our Story',

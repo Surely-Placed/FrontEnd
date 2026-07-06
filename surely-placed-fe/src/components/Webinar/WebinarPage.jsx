@@ -547,15 +547,24 @@ const WebinarPage = ({
       <AnimatedSection sx={sectionSx}>
         <Grid container spacing={4} alignItems="center">
           <Grid size={{ xs: 12, md: 5 }} display="flex" justifyContent="center">
-            <Image
-              src="/webinar/instructor.svg"
-              alt="Dhiraj Kumar Jain"
-              width={260}
-              height={300}
-              unoptimized
-              className="h_auto w_100"
-              style={{ maxWidth: 260, borderRadius: '1rem' }}
-            />
+            <Box
+              sx={{
+                width: '100%',
+                maxWidth: 280,
+                aspectRatio: '4 / 5',
+                borderRadius: '1rem',
+                overflow: 'hidden',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+              }}
+            >
+              <Image
+                src="/dhiraj.jpeg"
+                alt="Dhiraj Kumar Jain, webinar instructor"
+                width={280}
+                height={350}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+              />
+            </Box>
           </Grid>
           <Grid size={{ xs: 12, md: 7 }}>
             <CustomDivider text="Meet Your Instructor" />
