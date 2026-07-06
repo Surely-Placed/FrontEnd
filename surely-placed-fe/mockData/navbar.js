@@ -4,6 +4,10 @@ export const navLinks = [
   //   link: '/services',
   // },
   {
+    text: 'Webinar',
+    link: '/webinar',
+  },
+  {
     text: 'Meet Cohorts',
     link: '/meet-cohorts',
   },

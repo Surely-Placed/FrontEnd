@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="blueGlow" cx="28%" cy="18%" r="55%">
+      <stop offset="0%" stop-color="#2857C4" stop-opacity="0.55" />
+      <stop offset="45%" stop-color="#2857C4" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#2857C4" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="tealGlow" cx="78%" cy="82%" r="55%">
+      <stop offset="0%" stop-color="#38BDB1" stop-opacity="0.42" />
+      <stop offset="45%" stop-color="#38BDB1" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="#38BDB1" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="violetGlow" cx="62%" cy="8%" r="45%">
+      <stop offset="0%" stop-color="#5B7CE0" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#5B7CE0" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#0D0D0D" />
+  <rect width="1600" height="900" fill="url(#blueGlow)" />
+  <rect width="1600" height="900" fill="url(#tealGlow)" />
+  <rect width="1600" height="900" fill="url(#violetGlow)" />
+</svg>

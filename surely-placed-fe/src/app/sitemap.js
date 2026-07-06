@@ -7,6 +7,7 @@ const staticRoutes = [
   '/our-story',
   '/become-mentor',
   '/careers',
+  '/webinar',
   '/book-a-call',
   '/privacy-policy',
   '/terms-and-conditions',
