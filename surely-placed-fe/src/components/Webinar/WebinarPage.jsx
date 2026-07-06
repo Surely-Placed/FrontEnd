@@ -218,8 +218,8 @@ const WebinarPage = ({
   };
 
   const validateRegistration = () => {
-    if (!form.first.trim() || !form.last.trim()) {
-      return 'Please enter your first and last name.';
+    if (!form.fullName.trim()) {
+      return 'Please enter your full name.';
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
       return 'Please enter a valid email address.';
@@ -247,7 +247,7 @@ const WebinarPage = ({
     try {
       await startCheckout({
         planSlug: WEBINAR_PLAN_SLUG,
-        name: `${form.first.trim()} ${form.last.trim()}`,
+        name: form.fullName.trim(),
         email: form.email.trim(),
         contact: form.phone.trim(),
         registration: {
@@ -365,7 +365,6 @@ const WebinarPage = ({
             {[
               ['890+', 'students placed'],
               ['1,400+', 'registrations'],
-              ['4.9/5', 'attendee rating'],
             ].map(([n, label]) => (
               <Typography key={label} variant="body1" color="text.subText" fontSize={{ xs: '1rem', sm: '1.125rem' }}>
                 <Typography component="span" fontWeight={700} fontSize={{ xs: '1.375rem', sm: '1.5rem' }} color="text">
@@ -783,26 +782,13 @@ const WebinarPage = ({
             <Typography variant="body2" color="text.subText">
               Live webinar · {WEBINAR_DATETIME_LABEL} · {priceLabel}
             </Typography>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="First name"
-                  value={form.first}
-                  onChange={setField('first')}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Last name"
-                  value={form.last}
-                  onChange={setField('last')}
-                />
-              </Grid>
-            </Grid>
+            <TextField
+              fullWidth
+              required
+              label="Full name"
+              value={form.fullName}
+              onChange={setField('fullName')}
+            />
             <TextField
               fullWidth
               required

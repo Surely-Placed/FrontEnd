@@ -15,7 +15,7 @@ export const SITE_PHONES = [
 
 export const SOCIAL_LINKS = {
   linkedin: 'https://www.linkedin.com/company/surely-placed/',
-  instagram: 'https://www.instagram.com/surelyplaced/',
+  instagram: 'https://www.instagram.com/surely.placed?igsh=MTVnMmI4MG83ZGk3Zg==',
 };
 
 export const ORGANIZATION_SCHEMA = {

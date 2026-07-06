@@ -116,8 +116,7 @@ export const WEBINAR_DEFAULTS = {
 };
 
 export const EMPTY_WEBINAR_FORM = {
-  first: '',
-  last: '',
+  fullName: '',
   email: '',
   phone: '',
   country: '',

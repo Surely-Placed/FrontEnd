@@ -27,6 +27,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { HomeManager } from '../../services/home/api';
 import { showToast } from '@/hooks/showToast';
+import { SOCIAL_LINKS } from '@/config/site';
 import CustomPhoneInputField from '@/common/CustomPhoneInputField';
 import CustomTimezoneSelect from '@/common/CustomTimezoneSelect';
 import Link from 'next/link';
@@ -180,7 +181,7 @@ const BookSection = () => {
                 </Stack>
                 <Box display={'flex'} alignItems={'center'} gap={1}>
                   <Link
-                    href={'https://www.instagram.com/surelyplaced/?igsh=bzI5N2pxejN3MXhn#'}
+                    href={SOCIAL_LINKS.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
