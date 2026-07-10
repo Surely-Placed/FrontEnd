@@ -12,6 +12,9 @@ const staticRoutes = [
   '/privacy-policy',
   '/terms-and-conditions',
   '/refund-cancellation-policy',
+  '/homepage',
+  '/ssg-privacy-policy',
+  '/ssg-terms-and-conditions',
 ];
 
 export default function sitemap() {

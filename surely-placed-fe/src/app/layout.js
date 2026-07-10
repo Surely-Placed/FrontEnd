@@ -2,8 +2,6 @@ import localFont from 'next/font/local';
 import '../../styles/index.scss';
 import ThemeRegistry from './theme-registry';
 import { Box } from '@mui/material';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/Homepage/Footer';
 import ClientToastContainer from '@/components/ClientToastContainer';
 import { Providers } from './providers';
 import GoogleTagManager from '@/components/seo/GoogleTagManager';
@@ -78,12 +76,8 @@ export default function RootLayout({ children }) {
         <Providers>
           <ThemeRegistry>
             <ClientToastContainer />
-            <Box className="limit-container">
-              <Navbar />
-              <Box component="main" id="main-content">
-                {children}
-              </Box>
-              <Footer />
+            <Box component="main" id="main-content">
+              {children}
             </Box>
           </ThemeRegistry>
         </Providers>
