@@ -496,33 +496,35 @@ const WebinarPage = ({
         <Box>{reserveButton()}</Box>
       </AnimatedSection>
 
-      {/* Video */}
-      <AnimatedSection sx={{ ...sectionSx, bgcolor: 'extremes.light' }}>
-        <CustomDivider text="2-Minute Preview" />
-        <Typography component="h2" sx={{ ...headingSx, mt: 2, mb: 3 }}>
-          Watch what you&apos;ll learn
-        </Typography>
-        <Box
-          sx={{
-            width: '100%',
-            aspectRatio: '16 / 9',
-            borderRadius: '1rem',
-            overflow: 'hidden',
-            boxShadow: 2,
-            mb: 3,
-          }}
-        >
+      {/* Video — hidden for now */}
+      {false && (
+        <AnimatedSection sx={{ ...sectionSx, bgcolor: 'extremes.light' }}>
+          <CustomDivider text="2-Minute Preview" />
+          <Typography component="h2" sx={{ ...headingSx, mt: 2, mb: 3 }}>
+            Watch what you&apos;ll learn
+          </Typography>
           <Box
-            component="iframe"
-            src={videoEmbedUrl}
-            title="Webinar preview"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            sx={{ width: '100%', height: '100%', border: 0, display: 'block' }}
-          />
-        </Box>
-        <Box>{reserveButton()}</Box>
-      </AnimatedSection>
+            sx={{
+              width: '100%',
+              aspectRatio: '16 / 9',
+              borderRadius: '1rem',
+              overflow: 'hidden',
+              boxShadow: 2,
+              mb: 3,
+            }}
+          >
+            <Box
+              component="iframe"
+              src={videoEmbedUrl}
+              title="Webinar preview"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              sx={{ width: '100%', height: '100%', border: 0, display: 'block' }}
+            />
+          </Box>
+          <Box>{reserveButton()}</Box>
+        </AnimatedSection>
+      )}
 
       {/* Walk away */}
       <AnimatedSection sx={sectionSx}>
