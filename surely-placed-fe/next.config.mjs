@@ -8,7 +8,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com https://www.googletagmanager.com; frame-src 'self' https://*.razorpay.com https://www.youtube.com;",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com https://www.googletagmanager.com https://connect.facebook.net; img-src 'self' data: blob: https://www.facebook.com https://*.facebook.com; connect-src 'self' https://www.facebook.com https://*.facebook.com https://connect.facebook.net; frame-src 'self' https://*.razorpay.com https://www.youtube.com;",
           },
         ],
       },

@@ -1,86 +1,78 @@
-'use client';
-
 import Link from 'next/link';
-import { Box, Typography } from '@mui/material';
-import { WebLogo } from '../../../public/images';
+import Image from 'next/image';
 import { SSG_PUBLIC_ROUTES as R } from '@/routes/ssg-public';
 
-const headerSx = {
-  borderBottom: '1px solid',
-  borderColor: 'rgba(255,255,255,0.15)',
-  bgcolor: 'primary.main',
-  px: { xs: 2, sm: 3 },
-  py: 2,
-};
-
-const contentSx = {
-  mx: 'auto',
-  maxWidth: 768,
-  px: { xs: 2, sm: 3 },
-  py: { xs: 4, sm: 5 },
-};
-
-const legalBodySx = {
-  mt: 4,
-  fontSize: '0.875rem',
-  lineHeight: 1.7,
-  color: 'text.subText',
-  '& h2': {
-    mt: 4,
-    mb: 1.5,
-    fontSize: '1.125rem',
-    fontWeight: 600,
-    color: 'text',
+const styles = {
+  page: {
+    minHeight: '100vh',
+    backgroundColor: '#fff',
+    color: '#292929',
+    fontFamily: 'var(--font-nexa), Arial, sans-serif',
   },
-  '& p': { mb: 1.5 },
-  '& ul': {
-    mb: 1.5,
-    pl: 2.5,
-    listStyleType: 'disc',
+  header: {
+    backgroundColor: '#2857C4',
+    borderBottom: '1px solid rgba(255,255,255,0.15)',
+    padding: '16px 24px',
   },
-  '& li': { mb: 0.75 },
-  '& a': {
-    color: 'primary.main',
-    textDecoration: 'underline',
+  headerInner: {
+    maxWidth: 768,
+    margin: '0 auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  backLink: {
+    color: 'rgba(255,255,255,0.85)',
+    textDecoration: 'none',
+    fontSize: '0.875rem',
+  },
+  main: {
+    maxWidth: 768,
+    margin: '0 auto',
+    padding: '40px 24px',
+  },
+  h1: {
+    fontFamily: 'var(--font-avantgarde), sans-serif',
+    fontSize: '2rem',
+    fontWeight: 700,
+    margin: 0,
+  },
+  body: {
+    marginTop: 32,
+    fontSize: '0.875rem',
+    lineHeight: 1.7,
+    color: '#737373',
   },
 };
 
 export default function LegalLayout({ title, children }) {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fff', color: 'text' }}>
-      <Box component="header" sx={headerSx}>
-        <Box
-          sx={{
-            mx: 'auto',
-            maxWidth: 768,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
-          }}
-        >
-          <Link href={R.home} style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <WebLogo width={120} height={40} />
+    <div style={styles.page}>
+      <header style={styles.header}>
+        <div style={styles.headerInner}>
+          <Link href={R.home} style={{ display: 'flex', alignItems: 'center' }}>
+            <Image src="/logo.svg" alt="Surely Placed — SSG Access" width={120} height={40} />
           </Link>
-          <Link href={R.home} style={{ textDecoration: 'none' }}>
-            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: '#fff' } }}>
-              Back to homepage
-            </Typography>
+          <Link href={R.home} style={styles.backLink}>
+            Back to homepage
           </Link>
-        </Box>
-      </Box>
+        </div>
+      </header>
 
-      <Box component="main" sx={contentSx}>
-        <Typography
-          component="h1"
-          fontFamily={'var(--font-avantgarde), sans-serif'}
-          fontSize={{ xs: '1.75rem', sm: '2rem' }}
-          fontWeight={700}
-        >
-          {title}
-        </Typography>
-        <Box sx={legalBodySx}>{children}</Box>
-      </Box>
-    </Box>
+      <main style={styles.main}>
+        <h1 style={styles.h1}>{title}</h1>
+        <style>{`
+          .ssg-legal h2 { margin-top: 2rem; margin-bottom: 0.75rem; font-size: 1.125rem; font-weight: 600; color: #292929; }
+          .ssg-legal p { margin-bottom: 0.75rem; }
+          .ssg-legal ul { margin-bottom: 0.75rem; padding-left: 1.25rem; list-style: disc; }
+          .ssg-legal li { margin-bottom: 0.5rem; }
+          .ssg-legal a { color: #2857C4; text-decoration: underline; }
+        `}</style>
+        <div className="ssg-legal" style={styles.body}>
+          {children}
+        </div>
+      </main>
+    </div>
   );
 }

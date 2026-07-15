@@ -1,6 +1,7 @@
 import React from 'react';
 import WebinarPage from '@/components/Webinar/WebinarPage';
 import JsonLd from '@/components/seo/JsonLd';
+import MetaPixel from '@/components/seo/MetaPixel';
 import { buildFaqSchema, buildPageMetadata } from '@/lib/seo';
 import { WEBINAR_FAQS } from '../../../../mockData/Webinar';
 
@@ -14,6 +15,7 @@ export const metadata = buildPageMetadata({
 const page = () => {
   return (
     <>
+      <MetaPixel />
       <JsonLd data={buildFaqSchema(WEBINAR_FAQS.map((f) => ({ question: f.q, answer: f.a })))} />
       <WebinarPage />
     </>
