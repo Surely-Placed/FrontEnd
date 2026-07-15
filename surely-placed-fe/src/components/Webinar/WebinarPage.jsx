@@ -26,6 +26,7 @@ import { motion } from 'framer-motion';
 import CustomDivider from '@/common/CustomDivider';
 import { showToast } from '@/hooks/showToast';
 import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
+import { trackMetaEvent } from '@/components/seo/MetaPixel';
 import { ExpandIcon } from '../../../public/images';
 import {
   WEBINAR_FAQS,
@@ -281,6 +282,13 @@ const WebinarPage = ({
     onSuccess: () => {
       setRegistrationOpen(false);
       setSuccess(true);
+      trackMetaEvent('Lead', { content_name: 'Webinar Registration' });
+      trackMetaEvent('Purchase', {
+        value: price,
+        currency: 'USD',
+        content_name: 'Live Career Webinar',
+        content_ids: [WEBINAR_PLAN_SLUG],
+      });
       showToast('Payment successful! Check your email for confirmation.', 'success');
     },
     onFailure: (err) => {
@@ -304,6 +312,11 @@ const WebinarPage = ({
   const openCheckout = () => {
     setRegistrationOpen(true);
     setFormError('');
+    trackMetaEvent('InitiateCheckout', {
+      value: price,
+      currency: 'USD',
+      content_name: 'Live Career Webinar',
+    });
   };
 
   const validateRegistration = () => {

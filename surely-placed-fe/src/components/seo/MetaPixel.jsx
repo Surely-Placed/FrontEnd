@@ -1,12 +1,55 @@
+'use client';
+
+import { useEffect } from 'react';
 import Script from 'next/script';
 
-const META_PIXEL_ID = '1542444291014468';
+export const META_PIXEL_ID = '1542444291014468';
+
+function ensureFbqStub() {
+  if (typeof window === 'undefined') return;
+  if (window.fbq) return;
+
+  class n {
+    constructor() {
+      // eslint-disable-next-line prefer-rest-params, prefer-spread
+      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+    }
+  }
+  if (!window._fbq) window._fbq = n;
+  n.push = n;
+  n.loaded = true;
+  n.version = '2.0';
+  n.queue = [];
+  window.fbq = n;
+}
+
+/** Fire a Meta Pixel standard/custom event (safe if pixel not ready yet). */
+export function trackMetaEvent(eventName, params = {}) {
+  if (typeof window === 'undefined') return;
+  ensureFbqStub();
+  try {
+    window.fbq('track', eventName, params);
+  } catch {
+    // ignore tracking errors
+  }
+}
 
 /**
- * Meta (Facebook) Pixel — PageView tracking for ad measurement / retargeting.
- * Used on pages that need Meta ads attribution (e.g. webinar).
+ * Meta (Facebook) Pixel — webinar page.
+ * Official base code + PageView on every mount.
  */
-const MetaPixel = ({ pixelId = META_PIXEL_ID }) => {
+export default function MetaPixel({ pixelId = META_PIXEL_ID }) {
+  useEffect(() => {
+    if (!pixelId) return;
+    ensureFbqStub();
+    try {
+      window.fbq('init', pixelId);
+      window.fbq('track', 'PageView');
+    } catch {
+      // ignore
+    }
+  }, [pixelId]);
+
   if (!pixelId) return null;
 
   return (
@@ -18,10 +61,10 @@ n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
 n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
+s.parentNode.insertBefore(t,s)}(window,document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '${pixelId}');
-fbq('track', 'PageView');`}
+fbq('init','${pixelId}');
+fbq('track','PageView');`}
       </Script>
       <noscript>
         <img
@@ -34,7 +77,4 @@ fbq('track', 'PageView');`}
       </noscript>
     </>
   );
-};
-
-export default MetaPixel;
-export { META_PIXEL_ID };
+}
