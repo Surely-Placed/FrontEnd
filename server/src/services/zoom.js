@@ -64,6 +64,22 @@ async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function clearZoomTokenCache() {
+  cachedToken = null;
+  cachedTokenExpiresAt = 0;
+}
+
+function formatZoomDeleteError(status, body) {
+  const message = body?.message || body?.reason || body?.error || `HTTP ${status}`;
+  if (/does not contain scopes/i.test(String(message)) && /delete/i.test(String(message))) {
+    return (
+      'Zoom OAuth app is missing delete permission. In Zoom Marketplace → your Server-to-Server OAuth app → Scopes, add meeting:delete:meeting:admin, activate/save the app, then delete again. ' +
+      `(${message})`
+    );
+  }
+  return `Zoom meeting delete failed (${status}): ${message}`;
+}
+
 /**
  * Register a paid attendee on a Zoom Pro Meeting (registration required).
  * Uses Meeting registrant API — no Webinar add-on needed.
@@ -413,11 +429,12 @@ export async function ensureMeetingHostGate(meetingId) {
 }
 
 /** Delete a Zoom meeting. Ignores already-deleted meetings. */
-export async function deleteZoomMeeting(meetingId) {
+export async function deleteZoomMeeting(meetingId, { retried = false } = {}) {
   if (!isZoomAuthConfigured() || !meetingId) return { deleted: false };
 
+  const normalizedId = String(meetingId).replace(/\s+/g, '');
   const token = await getAccessToken();
-  const response = await fetch(`${ZOOM_API_BASE}/meetings/${encodeURIComponent(meetingId)}`, {
+  const response = await fetch(`${ZOOM_API_BASE}/meetings/${encodeURIComponent(normalizedId)}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -425,17 +442,31 @@ export async function deleteZoomMeeting(meetingId) {
   });
 
   if (response.ok || response.status === 204 || response.status === 404) {
-    return { deleted: true };
+    try {
+      await getMeetingLiveStatus(normalizedId);
+      throw new Error(
+        `Zoom meeting ${normalizedId} still exists after delete. Add meeting:delete:meeting:admin to your Zoom OAuth app scopes.`
+      );
+    } catch (error) {
+      if (isZoomMeetingNotFoundError(error)) {
+        return { deleted: true, meetingId: normalizedId };
+      }
+      throw error;
+    }
   }
 
   const body = await response.json().catch(() => ({}));
   if (body?.code === 3001) {
-    return { deleted: true };
+    return { deleted: true, meetingId: normalizedId };
   }
 
-  throw new Error(
-    `Zoom meeting delete failed (${response.status}): ${body?.message || response.statusText}`
-  );
+  const errMessage = formatZoomDeleteError(response.status, body);
+  if (!retried && /does not contain scopes/i.test(String(body?.message || ''))) {
+    clearZoomTokenCache();
+    return deleteZoomMeeting(normalizedId, { retried: true });
+  }
+
+  throw new Error(errMessage);
 }
 
 /** @deprecated Use addMeetingRegistrant — Pro plan uses Meetings, not Webinar add-on. */
