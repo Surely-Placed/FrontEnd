@@ -24,9 +24,15 @@ export default function SettingsSection() {
         token,
         method: 'POST',
       });
-      const msg = `Removed ${result.deletedEvents} webinars, ${result.deletedOrders} pending orders, ${result.deletedWaitlist} waitlist rows.`;
+      const msg = `Removed ${result.deletedEvents} webinars, ${result.deletedOrders} pending orders, ${result.deletedWaitlist} waitlist rows${
+        result.zoomDeleted ? `, and ${result.zoomDeleted} Zoom meeting(s)` : ''
+      }.`;
       setMessage(msg);
-      showToast(msg, 'success');
+      if (result.zoomErrors?.length) {
+        showToast(`${msg} Some Zoom meetings could not be deleted — check server logs.`, 'error');
+      } else {
+        showToast(msg, 'success');
+      }
       setConfirmOpen(false);
       router.push('/sp-webinar-ops');
     } catch (err) {
@@ -54,7 +60,7 @@ export default function SettingsSection() {
           Remove webinars & pending orders
         </Typography>
         <Typography variant="body2" color="text.secondary" mb={2} lineHeight={1.5}>
-          Permanently deletes all webinar events, waitlist rows, and non-paid (pending) webinar
+          Permanently deletes all webinar events (and their Zoom meetings), waitlist rows, and non-paid (pending) webinar
           orders. Paid orders are kept.
         </Typography>
         <OpsButton tone="danger" disabled={saving} onClick={() => setConfirmOpen(true)}>
@@ -65,7 +71,7 @@ export default function SettingsSection() {
       <ConfirmDialog
         open={confirmOpen}
         title="Remove webinars & pending orders?"
-        description="This permanently deletes all webinar events, waitlist entries, and non-paid (pending) webinar orders. Paid orders are kept."
+        description="This permanently deletes all webinar events, linked Zoom meetings, waitlist entries, and non-paid (pending) webinar orders. Paid orders are kept."
         confirmLabel="Remove data"
         loading={saving}
         onClose={() => !saving && setConfirmOpen(false)}

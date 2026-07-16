@@ -83,16 +83,16 @@ export async function deleteWebinarEvent(eventId) {
   }
 
   let zoomDeleted = false;
-  if (row.zoom_meeting_id && isZoomAuthConfigured()) {
-    try {
-      await deleteZoomMeeting(row.zoom_meeting_id);
-      zoomDeleted = true;
-    } catch (error) {
-      console.warn(
-        `Zoom delete failed for meeting ${row.zoom_meeting_id} (continuing with local delete):`,
-        error.message
+  if (row.zoom_meeting_id) {
+    if (!isZoomAuthConfigured()) {
+      const error = new Error(
+        'Zoom OAuth is not configured — cannot delete the linked Zoom meeting. Set ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, and ZOOM_CLIENT_SECRET.'
       );
+      error.statusCode = 503;
+      throw error;
     }
+    await deleteZoomMeeting(row.zoom_meeting_id);
+    zoomDeleted = true;
   }
 
   clearWebinarLiveCache();
@@ -102,6 +102,7 @@ export async function deleteWebinarEvent(eventId) {
     deleted: true,
     id: eventId,
     zoomDeleted,
+    zoomMeetingId: row.zoom_meeting_id || null,
     wasActive: Boolean(row.active),
   };
 }
@@ -596,6 +597,32 @@ export async function listWebinarAttendees({ page = 1, pageSize = 20, status } =
 export async function clearWebinarTestData() {
   const { DB_SCHEMA } = await import('../db-schema.js');
 
+  const events = await table('webinar_events').select('id', 'zoom_meeting_id', 'title');
+  let zoomDeleted = 0;
+  const zoomErrors = [];
+
+  if (isZoomAuthConfigured()) {
+    for (const event of events) {
+      if (!event.zoom_meeting_id) continue;
+      try {
+        await deleteZoomMeeting(event.zoom_meeting_id);
+        zoomDeleted += 1;
+      } catch (error) {
+        zoomErrors.push({
+          meetingId: event.zoom_meeting_id,
+          title: event.title,
+          message: error.message,
+        });
+      }
+    }
+  } else if (events.some((e) => e.zoom_meeting_id)) {
+    zoomErrors.push({
+      meetingId: null,
+      title: null,
+      message: 'Zoom OAuth is not configured — linked Zoom meetings were not deleted.',
+    });
+  }
+
   const webinarOrderIds = await applyWebinarOrderFilter(
     db.withSchema(DB_SCHEMA).from('orders').join('plans', 'plans.id', 'orders.plan_id')
   )
@@ -610,6 +637,7 @@ export async function clearWebinarTestData() {
   }
 
   const deletedEvents = await table('webinar_events').del();
+  if (deletedEvents) clearWebinarLiveCache();
   let deletedWaitlist = 0;
   try {
     deletedWaitlist = await table('webinar_waitlist').del();
@@ -621,6 +649,8 @@ export async function clearWebinarTestData() {
     deletedOrders: Number(deletedOrders) || ids.length,
     deletedEvents: Number(deletedEvents) || 0,
     deletedWaitlist: Number(deletedWaitlist) || 0,
+    zoomDeleted,
+    zoomErrors,
   };
 }
 

@@ -84,7 +84,11 @@ export default function OverviewSection() {
         token,
         method: 'DELETE',
       });
-      showToast(`Deleted “${pendingDelete.title}”`, 'success');
+      const zoomNote =
+        pendingDelete.zoomMeetingId != null && pendingDelete.zoomMeetingId !== ''
+          ? ' Zoom meeting removed.'
+          : '';
+      showToast(`Deleted “${pendingDelete.title}”.${zoomNote}`, 'success');
       setPendingDelete(null);
       const nextPage =
         webinars.length === 1 && page > 1 ? page - 1 : page;
@@ -233,7 +237,7 @@ export default function OverviewSection() {
         title="Delete webinar?"
         description={
           pendingDelete
-            ? `Delete ${pendingDelete.active ? 'the active' : 'this'} webinar “${pendingDelete.title}”? This removes it from the database and tries to delete the Zoom meeting.`
+            ? `Delete ${pendingDelete.active ? 'the active' : 'this'} webinar “${pendingDelete.title}”? This removes it from the database and deletes the linked Zoom meeting.`
             : ''
         }
         confirmLabel="Delete webinar"
