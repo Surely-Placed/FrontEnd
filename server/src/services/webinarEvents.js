@@ -2,6 +2,7 @@ import db, { table } from '../db.js';
 import { config } from '../config.js';
 import {
   createRegistrationMeeting,
+  deleteZoomMeeting,
   ensureMeetingHostGate,
   getMeetingLiveStatus,
   getZoomMeetingId,
@@ -45,6 +46,64 @@ export async function getActiveWebinarEvent() {
 export async function listWebinarEvents() {
   await reconcileDeletedZoomMeetings();
   return table('webinar_events').orderBy('created_at', 'desc');
+}
+
+export async function listWebinarEventsPaginated({ page = 1, pageSize = 10 } = {}) {
+  await reconcileDeletedZoomMeetings();
+  const safePage = Math.max(1, Number(page) || 1);
+  const safeSize = Math.min(100, Math.max(1, Number(pageSize) || 10));
+  const offset = (safePage - 1) * safeSize;
+
+  const countRow = await table('webinar_events').count({ total: '*' }).first();
+  const total = Number(countRow?.total) || 0;
+
+  const rows = await table('webinar_events')
+    .orderBy('created_at', 'desc')
+    .limit(safeSize)
+    .offset(offset);
+
+  return {
+    webinars: rows.map(serializeEvent),
+    pagination: {
+      page: safePage,
+      pageSize: safeSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / safeSize) || 1),
+    },
+  };
+}
+
+/** Delete a webinar event by id. Also removes the Zoom meeting when present. */
+export async function deleteWebinarEvent(eventId) {
+  const row = await table('webinar_events').where({ id: eventId }).first();
+  if (!row) {
+    const error = new Error('Webinar event not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  let zoomDeleted = false;
+  if (row.zoom_meeting_id && isZoomAuthConfigured()) {
+    try {
+      await deleteZoomMeeting(row.zoom_meeting_id);
+      zoomDeleted = true;
+    } catch (error) {
+      console.warn(
+        `Zoom delete failed for meeting ${row.zoom_meeting_id} (continuing with local delete):`,
+        error.message
+      );
+    }
+  }
+
+  clearWebinarLiveCache();
+  await table('webinar_events').where({ id: eventId }).del();
+
+  return {
+    deleted: true,
+    id: eventId,
+    zoomDeleted,
+    wasActive: Boolean(row.active),
+  };
 }
 
 /** Remove local webinar rows whose Zoom meeting was deleted in Zoom. */

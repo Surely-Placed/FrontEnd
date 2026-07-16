@@ -412,6 +412,32 @@ export async function ensureMeetingHostGate(meetingId) {
   }
 }
 
+/** Delete a Zoom meeting. Ignores already-deleted meetings. */
+export async function deleteZoomMeeting(meetingId) {
+  if (!isZoomAuthConfigured() || !meetingId) return { deleted: false };
+
+  const token = await getAccessToken();
+  const response = await fetch(`${ZOOM_API_BASE}/meetings/${encodeURIComponent(meetingId)}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.ok || response.status === 204 || response.status === 404) {
+    return { deleted: true };
+  }
+
+  const body = await response.json().catch(() => ({}));
+  if (body?.code === 3001) {
+    return { deleted: true };
+  }
+
+  throw new Error(
+    `Zoom meeting delete failed (${response.status}): ${body?.message || response.statusText}`
+  );
+}
+
 /** @deprecated Use addMeetingRegistrant — Pro plan uses Meetings, not Webinar add-on. */
 export async function addWebinarRegistrant(args) {
   const result = await addMeetingRegistrant(args);

@@ -7,10 +7,10 @@ import {
 import {
   clearWebinarTestData,
   createWebinarEvent,
+  deleteWebinarEvent,
   getPublicWebinarConfig,
   listWebinarAttendees,
-  listWebinarEvents,
-  serializeEvent,
+  listWebinarEventsPaginated,
   updateWebinarEvent,
   updateWebinarSeats,
 } from '../services/webinarEvents.js';
@@ -40,10 +40,22 @@ router.get('/me', requireAdmin, (_req, res) => {
   });
 });
 
-router.get('/webinars', requireAdmin, async (_req, res, next) => {
+router.get('/webinars', requireAdmin, async (req, res, next) => {
   try {
-    const rows = await listWebinarEvents();
-    res.json({ webinars: rows.map(serializeEvent) });
+    const result = await listWebinarEventsPaginated({
+      page: req.query.page,
+      pageSize: req.query.pageSize,
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/webinars/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const result = await deleteWebinarEvent(req.params.id);
+    res.json(result);
   } catch (error) {
     next(error);
   }

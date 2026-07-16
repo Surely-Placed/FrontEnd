@@ -100,11 +100,10 @@ export function HeroSection({
           direction="row"
           flexWrap="wrap"
           justifyContent="center"
+          alignItems="center"
           gap={{ xs: 2, md: 4 }}
-          mt={4}
-          pt={3}
-          borderTop="1px solid"
-          borderColor="customBlue.light"
+          mt={webinarActive ? 4 : 3}
+          width="100%"
         >
           {[
             ['890+', 'students placed'],
@@ -114,6 +113,7 @@ export function HeroSection({
               key={label}
               variant="body1"
               color="text.subText"
+              textAlign="center"
               fontSize={{ xs: '1rem', sm: '1.125rem' }}
             >
               <Typography

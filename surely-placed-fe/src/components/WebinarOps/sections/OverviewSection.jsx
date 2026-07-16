@@ -1,35 +1,61 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
 import { adminFetch } from '../api';
+import { PAGE_SIZE } from '../constants';
 import { useOps } from '../OpsContext';
 import { formatEst, formatMoneyUsd } from '../format';
 import OpsButton from '../ui/OpsButton';
 import OpsCard from '../ui/OpsCard';
+import PaginationBar from '../ui/PaginationBar';
 
 export default function OverviewSection() {
   const { token, logout, setError } = useOps();
   const [loading, setLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const [active, setActive] = useState(null);
   const [webinars, setWebinars] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [page, setPage] = useState(1);
   const [paidCount, setPaidCount] = useState(0);
+
+  const loadSummary = useCallback(async () => {
+    const [activeRes, attendeesRes] = await Promise.all([
+      adminFetch('/api/admin/webinars/active', { token }),
+      adminFetch('/api/admin/attendees?page=1&pageSize=1', { token }),
+    ]);
+    setActive(activeRes.webinar);
+    setPaidCount(attendeesRes.paidCount || 0);
+  }, [token]);
+
+  const loadWebinars = useCallback(
+    async (nextPage = page) => {
+      setListLoading(true);
+      try {
+        const qs = new URLSearchParams({
+          page: String(nextPage),
+          pageSize: String(PAGE_SIZE),
+        });
+        const listRes = await adminFetch(`/api/admin/webinars?${qs}`, { token });
+        setWebinars(listRes.webinars || []);
+        setPagination(listRes.pagination || null);
+        setPage(listRes.pagination?.page || nextPage);
+      } finally {
+        setListLoading(false);
+      }
+    },
+    [token, page]
+  );
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const [activeRes, listRes, attendeesRes] = await Promise.all([
-          adminFetch('/api/admin/webinars/active', { token }),
-          adminFetch('/api/admin/webinars', { token }),
-          adminFetch('/api/admin/attendees?page=1&pageSize=1', { token }),
-        ]);
-        if (cancelled) return;
-        setActive(activeRes.webinar);
-        setWebinars(listRes.webinars || []);
-        setPaidCount(attendeesRes.paidCount || 0);
+        await Promise.all([loadSummary(), loadWebinars(1)]);
       } catch (err) {
         if (!cancelled) {
           setError(err.message);
@@ -42,7 +68,31 @@ export default function OverviewSection() {
     return () => {
       cancelled = true;
     };
-  }, [token, logout, setError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  const handleDelete = async (webinar) => {
+    const label = webinar.active ? 'ACTIVE webinar' : 'webinar';
+    const ok = window.confirm(
+      `Delete ${label} "${webinar.title}"?\n\nThis removes it from the database and tries to delete the Zoom meeting.`
+    );
+    if (!ok) return;
+
+    setDeletingId(webinar.id);
+    setError('');
+    try {
+      await adminFetch(`/api/admin/webinars/${webinar.id}`, {
+        token,
+        method: 'DELETE',
+      });
+      await Promise.all([loadSummary(), loadWebinars(page)]);
+    } catch (err) {
+      setError(err.message);
+      if (/Unauthorized/i.test(err.message)) logout();
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -99,47 +149,78 @@ export default function OverviewSection() {
       </OpsCard>
 
       <OpsCard>
-        <Typography fontWeight={700} mb={1}>
-          All webinar events ({webinars.length})
-        </Typography>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          gap={2}
+          mb={2}
+          flexWrap="wrap"
+        >
+          <Typography fontWeight={700} lineHeight={1.3}>
+            All webinar events
+            {pagination?.total != null ? ` (${pagination.total})` : ''}
+          </Typography>
+          {listLoading && <CircularProgress size={18} />}
+        </Stack>
+
         {webinars.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
             No webinars in the database.
           </Typography>
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-              <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '1px solid #D8E1F4' }}>
-                  <th style={{ padding: 10 }}>Title</th>
-                  <th style={{ padding: 10 }}>Starts (EST)</th>
-                  <th style={{ padding: 10 }}>Price</th>
-                  <th style={{ padding: 10 }}>Seats</th>
-                  <th style={{ padding: 10 }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {webinars.map((w) => (
-                  <tr key={w.id} style={{ borderBottom: '1px solid #EEF2F8' }}>
-                    <td style={{ padding: 10 }}>{w.title}</td>
-                    <td style={{ padding: 10 }}>{formatEst(w.startsAt)}</td>
-                    <td style={{ padding: 10 }}>{formatMoneyUsd(w.priceCents)}</td>
-                    <td style={{ padding: 10 }}>
-                      {w.seatsLeft}/{w.seatsTotal}
-                    </td>
-                    <td style={{ padding: 10 }}>
-                      <Chip
-                        size="small"
-                        label={w.active ? 'Active' : 'Inactive'}
-                        color={w.active ? 'success' : 'default'}
-                        variant="outlined"
-                      />
-                    </td>
+          <>
+            <Box sx={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', borderBottom: '1px solid #D8E1F4' }}>
+                    <th style={{ padding: 10 }}>Title</th>
+                    <th style={{ padding: 10 }}>Starts (EST)</th>
+                    <th style={{ padding: 10 }}>Price</th>
+                    <th style={{ padding: 10 }}>Seats</th>
+                    <th style={{ padding: 10 }}>Status</th>
+                    <th style={{ padding: 10, textAlign: 'right' }}>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </Box>
+                </thead>
+                <tbody>
+                  {webinars.map((w) => (
+                    <tr key={w.id} style={{ borderBottom: '1px solid #EEF2F8' }}>
+                      <td style={{ padding: 10 }}>{w.title}</td>
+                      <td style={{ padding: 10 }}>{formatEst(w.startsAt)}</td>
+                      <td style={{ padding: 10 }}>{formatMoneyUsd(w.priceCents)}</td>
+                      <td style={{ padding: 10 }}>
+                        {w.seatsLeft}/{w.seatsTotal}
+                      </td>
+                      <td style={{ padding: 10 }}>
+                        <Chip
+                          size="small"
+                          label={w.active ? 'Active' : 'Inactive'}
+                          color={w.active ? 'success' : 'default'}
+                          variant="outlined"
+                        />
+                      </td>
+                      <td style={{ padding: 10, textAlign: 'right' }}>
+                        <OpsButton
+                          tone="danger"
+                          size="small"
+                          disabled={Boolean(deletingId)}
+                          onClick={() => handleDelete(w)}
+                          sx={{ minHeight: 36, py: 0.75, px: 1.5 }}
+                        >
+                          {deletingId === w.id ? 'Deleting…' : 'Delete'}
+                        </OpsButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+            <PaginationBar
+              pagination={pagination}
+              loading={listLoading || Boolean(deletingId)}
+              onPageChange={(p) => loadWebinars(p)}
+            />
+          </>
         )}
       </OpsCard>
     </Stack>

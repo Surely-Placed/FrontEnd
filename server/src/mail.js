@@ -6,10 +6,12 @@ import {
   buildGoogleCalendarUrl,
   buildWebinarConfirmationHtml,
 } from './emails/webinarConfirmationHtml.js';
+import { buildWaitlistOpenedHtml } from './emails/waitlistOpenedHtml.js';
 
 const WEBINAR_DATETIME = 'Sunday, July 20, 2026 · 8 PM ET';
 const LOGO_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/assets/logo-icon.png');
 const LOGO_CID = 'sp-logo';
+const FROM_DISPLAY_NAME = 'Surely Placed Webinar';
 
 let transporter;
 
@@ -31,6 +33,14 @@ function getTransporter() {
   }
 
   return transporter;
+}
+
+/** Gmail shows the mailbox local-part ("grow") unless a display name is set. */
+function mailFrom() {
+  const address = config.smtp.from;
+  if (!address) return address;
+  if (address.includes('<')) return address;
+  return `"${FROM_DISPLAY_NAME}" <${address}>`;
 }
 
 function formatAmount(amountMinor, currency) {
@@ -105,7 +115,7 @@ export async function sendZoomRegistrationFailureAlert({ order, plan, customer, 
   if (!transport || !teamEmail || !config.smtp.from) return;
 
   await transport.sendMail({
-    from: config.smtp.from,
+    from: mailFrom(),
     to: teamEmail,
     subject: `[Surely Placed] Zoom registration FAILED — ${customer?.name || order?.id}`,
     html: buildEmailHtml({
@@ -152,7 +162,7 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
   ];
 
   await transport.sendMail({
-    from: config.smtp.from,
+    from: mailFrom(),
     to: teamEmail,
     subject: webinar
       ? `[Surely Placed] New webinar registration — ${customer?.name}`
@@ -201,7 +211,7 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
         });
 
     await transport.sendMail({
-      from: config.smtp.from,
+      from: mailFrom(),
       to: customer.email,
       subject: webinar
         ? "You're registered! Surely Placed Live Webinar"
@@ -228,7 +238,7 @@ export async function sendWaitlistSignupAlert({ name, email, contact }) {
   if (!transport || !teamEmail || !config.smtp.from) return;
 
   await transport.sendMail({
-    from: config.smtp.from,
+    from: mailFrom(),
     to: teamEmail,
     subject: `[Surely Placed] Webinar waitlist — ${name}`,
     html: buildEmailHtml({
@@ -250,24 +260,40 @@ export async function sendWaitlistOpenedEmails({ recipients, webinar }) {
 
   const title = webinar?.title || 'Live Career Webinar';
   const when = webinar?.datetimeLabel || webinar?.datetime_label || 'soon';
-  const href = `${config.siteUrl.replace(/\/$/, '')}/webinar`;
+  const siteUrl = (config.siteUrl || 'https://www.surelyplaced.com').replace(/\/$/, '');
+  const href = `${siteUrl}/webinar`;
+  const supportEmail = config.smtp.from || config.smtp.to || 'support@surelyplaced.com';
+  const priceCents = webinar?.priceCents ?? webinar?.price_cents;
+  const priceLabel =
+    typeof priceCents === 'number' ? `$${(priceCents / 100).toFixed(2)}` : null;
+  const seatsTotal = webinar?.seatsTotal ?? webinar?.seats_total ?? null;
 
   for (const person of recipients) {
     if (!person?.email) continue;
+    const html = buildWaitlistOpenedHtml({
+      customerName: person.name,
+      eventTitle: title,
+      datetimeLabel: when,
+      reserveUrl: href,
+      logoUrl: `cid:${LOGO_CID}`,
+      siteUrl,
+      supportEmail,
+      priceLabel,
+      seatsTotal,
+    });
+
     await transport.sendMail({
-      from: config.smtp.from,
+      from: mailFrom(),
       to: person.email,
       subject: `Seats are open — ${title}`,
-      html: buildEmailHtml({
-        title: 'A new webinar is scheduled',
-        intro: `Hi ${escapeHtml(person.name || 'there')}, seats are now open for <strong>${escapeHtml(title)}</strong> (${escapeHtml(when)}). Reserve yours before they fill up.`,
-        lines: [
-          { label: 'Event', value: title },
-          { label: 'When', value: when },
-        ],
-        cta: { href, label: 'Reserve your seat' },
-        footer: `You're receiving this because you joined the Surely Placed webinar waitlist.`,
-      }),
+      html,
+      attachments: [
+        {
+          filename: 'logo-icon.png',
+          path: LOGO_PATH,
+          cid: LOGO_CID,
+        },
+      ],
     });
   }
 }
