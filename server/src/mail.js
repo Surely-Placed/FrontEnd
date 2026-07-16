@@ -1,7 +1,15 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import { config } from './config.js';
+import {
+  buildGoogleCalendarUrl,
+  buildWebinarConfirmationHtml,
+} from './emails/webinarConfirmationHtml.js';
 
 const WEBINAR_DATETIME = 'Sunday, July 20, 2026 · 8 PM ET';
+const LOGO_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/assets/logo-icon.png');
+const LOGO_CID = 'sp-logo';
 
 let transporter;
 
@@ -50,13 +58,13 @@ function buildEmailHtml({ title, intro, lines, footer, cta }) {
 
   const ctaBlock =
     cta?.href && cta?.label
-      ? `<p style="margin:24px 0 8px;"><a href="${escapeHtml(cta.href)}" style="display:inline-block;background:#1a56db;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;">${escapeHtml(cta.label)}</a></p>
-         <p style="color:#666;font-size:12px;line-height:1.5;word-break:break-all;">If the button does not work, use this link:<br/><a href="${escapeHtml(cta.href)}" style="color:#1a56db;">${escapeHtml(cta.href)}</a></p>`
+      ? `<p style="margin:24px 0 8px;"><a href="${escapeHtml(cta.href)}" style="display:inline-block;background:#2857C4;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-size:15px;font-weight:700;">${escapeHtml(cta.label)}</a></p>
+         <p style="color:#666;font-size:12px;line-height:1.5;word-break:break-all;">If the button does not work, use this link:<br/><a href="${escapeHtml(cta.href)}" style="color:#2857C4;">${escapeHtml(cta.href)}</a></p>`
       : '';
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#ffffff;">
-      <h2 style="color:#1a56db;margin:0 0 12px;font-size:22px;">${escapeHtml(title)}</h2>
+      <h2 style="color:#2857C4;margin:0 0 12px;font-size:22px;">${escapeHtml(title)}</h2>
       ${intro ? `<p style="color:#444;font-size:15px;line-height:1.6;margin:0 0 20px;">${intro}</p>` : ''}
       <table style="width:100%;border-collapse:collapse;">${rows}</table>
       ${ctaBlock}
@@ -80,6 +88,15 @@ function getRegistrationLines(order, customer) {
 
 function isWebinarOrder(plan, order) {
   return plan?.slug === 'webinar-live' || order?.metadata?.plan_slug === 'webinar-live';
+}
+
+function getWebinarDatetimeLabel(order) {
+  return (
+    order?.metadata?.datetime_label ||
+    order?.metadata?.datetimeLabel ||
+    order?.metadata?.webinar_datetime_label ||
+    WEBINAR_DATETIME
+  );
 }
 
 export async function sendZoomRegistrationFailureAlert({ order, plan, customer, errorMessage }) {
@@ -120,11 +137,12 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
   const registrationLines = getRegistrationLines(order, customer);
   const zoom = order?.metadata?.zoom || {};
   const joinUrl = zoom.join_url || null;
+  const datetimeLabel = getWebinarDatetimeLabel(order);
 
   const paymentLines = [
     { label: 'Plan', value: plan?.name || 'N/A' },
     { label: 'Amount paid', value: amount },
-    { label: 'Webinar date', value: webinar ? WEBINAR_DATETIME : null },
+    { label: 'Webinar date', value: webinar ? datetimeLabel : null },
     { label: 'Order ID', value: order.id },
     { label: 'Payment ID', value: payment?.razorpay_payment_id || 'Confirmed' },
     { label: 'Zoom registrant ID', value: zoom.registrant_id || null },
@@ -149,9 +167,38 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
   });
 
   if (customer?.email) {
-    const webinarIntro = joinUrl
-      ? `Thank you for registering. Your seat is confirmed for our live webinar on ${WEBINAR_DATETIME}. Use the button below for your unique Zoom join link (only paid registrants can join). The Software Career Playbook will arrive in a separate email shortly.`
-      : `Thank you for registering. Your seat is confirmed for our live webinar on ${WEBINAR_DATETIME}. Your unique Zoom join link will be emailed as soon as registration completes (usually within a few minutes). The Software Career Playbook will arrive in a separate email shortly.`;
+    const siteUrl = (config.siteUrl || 'https://www.surelyplaced.com').replace(/\/$/, '');
+    const supportEmail = config.smtp.from || config.smtp.to || 'support@surelyplaced.com';
+
+    const customerHtml = webinar
+      ? buildWebinarConfirmationHtml({
+          customerName: customer.name,
+          datetimeLabel,
+          amountPaid: amount,
+          orderId: order.id,
+          joinUrl,
+          logoUrl: `cid:${LOGO_CID}`,
+          siteUrl,
+          supportEmail,
+          eventTitle: plan?.name || 'Live Career Webinar',
+          calendarUrl: buildGoogleCalendarUrl({
+            title: plan?.name || 'Surely Placed Live Webinar',
+            datetimeLabel,
+            joinUrl,
+            siteUrl,
+          }),
+        })
+      : buildEmailHtml({
+          title: 'Payment confirmed',
+          intro: 'Thank you for your payment. Your registration is confirmed.',
+          lines: [
+            { label: 'Event', value: plan?.name },
+            { label: 'Amount paid', value: amount },
+            { label: 'Status', value: 'Confirmed' },
+            { label: 'Order ID', value: order.id },
+          ],
+          footer: `Questions? Reply to this email or contact us at ${supportEmail}.`,
+        });
 
     await transport.sendMail({
       from: config.smtp.from,
@@ -159,21 +206,18 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
       subject: webinar
         ? "You're registered! Surely Placed Live Webinar"
         : 'Your Surely Placed payment confirmation',
-      html: buildEmailHtml({
-        title: webinar ? "You're registered for the live webinar!" : 'Payment confirmed',
-        intro: webinar
-          ? webinarIntro
-          : 'Thank you for your payment. Your registration is confirmed.',
-        lines: [
-          { label: 'Event', value: webinar ? 'Live Career Webinar' : plan?.name },
-          { label: 'Date & time', value: webinar ? WEBINAR_DATETIME : null },
-          { label: 'Amount paid', value: amount },
-          { label: 'Status', value: 'Confirmed' },
-          { label: 'Order ID', value: order.id },
-        ],
-        cta: webinar && joinUrl ? { href: joinUrl, label: 'Join Zoom Webinar' } : null,
-        footer: `Questions? Reply to this email or contact us at ${config.smtp.from}.`,
-      }),
+      html: customerHtml,
+      ...(webinar
+        ? {
+            attachments: [
+              {
+                filename: 'logo-icon.png',
+                path: LOGO_PATH,
+                cid: LOGO_CID,
+              },
+            ],
+          }
+        : {}),
     });
   }
 }

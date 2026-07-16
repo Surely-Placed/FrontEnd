@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from './config.js';
 import db from './db.js';
 import paymentsRouter from './routes/payments.js';
@@ -10,6 +12,7 @@ import adminRouter from './routes/admin.js';
 import webinarsRouter from './routes/webinars.js';
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.set('trust proxy', 1);
 
@@ -69,6 +72,14 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/api/payments', paymentsRouter);
 app.use('/api/webinars', webinarsRouter);
 app.use('/api/admin', adminRouter);
+
+// Public assets for transactional emails (logo, etc.)
+app.use(
+  express.static(path.join(__dirname, '../public'), {
+    maxAge: '7d',
+    index: false,
+  })
+);
 
 app.use((error, _req, res, _next) => {
   const statusCode = error.statusCode || 500;
