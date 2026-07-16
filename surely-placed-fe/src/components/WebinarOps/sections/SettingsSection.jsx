@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Stack, Typography } from '@mui/material';
+import { showToast } from '@/hooks/showToast';
 import { adminFetch } from '../api';
 import { useOps } from '../OpsContext';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import OpsButton from '../ui/OpsButton';
 import OpsCard from '../ui/OpsCard';
 
@@ -12,15 +14,9 @@ export default function SettingsSection() {
   const router = useRouter();
   const { token, setMessage, setError } = useOps();
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const clearData = async () => {
-    if (
-      !window.confirm(
-        'Remove all webinar events, waitlist entries, and non-paid (pending) webinar orders? Paid orders are kept.'
-      )
-    ) {
-      return;
-    }
     setSaving(true);
     setError('');
     try {
@@ -28,12 +24,14 @@ export default function SettingsSection() {
         token,
         method: 'POST',
       });
-      setMessage(
-        `Removed ${result.deletedEvents} webinars, ${result.deletedOrders} pending orders, ${result.deletedWaitlist} waitlist rows.`
-      );
+      const msg = `Removed ${result.deletedEvents} webinars, ${result.deletedOrders} pending orders, ${result.deletedWaitlist} waitlist rows.`;
+      setMessage(msg);
+      showToast(msg, 'success');
+      setConfirmOpen(false);
       router.push('/sp-webinar-ops');
     } catch (err) {
       setError(err.message);
+      showToast(err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -59,10 +57,20 @@ export default function SettingsSection() {
           Permanently deletes all webinar events, waitlist rows, and non-paid (pending) webinar
           orders. Paid orders are kept.
         </Typography>
-        <OpsButton tone="danger" disabled={saving} onClick={clearData}>
+        <OpsButton tone="danger" disabled={saving} onClick={() => setConfirmOpen(true)}>
           Remove webinars & pending orders
         </OpsButton>
       </OpsCard>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Remove webinars & pending orders?"
+        description="This permanently deletes all webinar events, waitlist entries, and non-paid (pending) webinar orders. Paid orders are kept."
+        confirmLabel="Remove data"
+        loading={saving}
+        onClose={() => !saving && setConfirmOpen(false)}
+        onConfirm={clearData}
+      />
     </Stack>
   );
 }

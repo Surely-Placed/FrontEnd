@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Box, Chip, CircularProgress, Stack, Typography } from '@mui/material';
+import { showToast } from '@/hooks/showToast';
 import { adminFetch } from '../api';
 import { PAGE_SIZE } from '../constants';
 import { useOps } from '../OpsContext';
 import { formatEst, formatMoneyUsd } from '../format';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import OpsButton from '../ui/OpsButton';
 import OpsCard from '../ui/OpsCard';
 import PaginationBar from '../ui/PaginationBar';
@@ -15,7 +17,8 @@ export default function OverviewSection() {
   const { token, logout, setError } = useOps();
   const [loading, setLoading] = useState(true);
   const [listLoading, setListLoading] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
   const [active, setActive] = useState(null);
   const [webinars, setWebinars] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -59,6 +62,7 @@ export default function OverviewSection() {
       } catch (err) {
         if (!cancelled) {
           setError(err.message);
+          showToast(err.message, 'error');
           if (/Unauthorized/i.test(err.message)) logout();
         }
       } finally {
@@ -71,26 +75,26 @@ export default function OverviewSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const handleDelete = async (webinar) => {
-    const label = webinar.active ? 'ACTIVE webinar' : 'webinar';
-    const ok = window.confirm(
-      `Delete ${label} "${webinar.title}"?\n\nThis removes it from the database and tries to delete the Zoom meeting.`
-    );
-    if (!ok) return;
-
-    setDeletingId(webinar.id);
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
     setError('');
     try {
-      await adminFetch(`/api/admin/webinars/${webinar.id}`, {
+      await adminFetch(`/api/admin/webinars/${pendingDelete.id}`, {
         token,
         method: 'DELETE',
       });
-      await Promise.all([loadSummary(), loadWebinars(page)]);
+      showToast(`Deleted “${pendingDelete.title}”`, 'success');
+      setPendingDelete(null);
+      const nextPage =
+        webinars.length === 1 && page > 1 ? page - 1 : page;
+      await Promise.all([loadSummary(), loadWebinars(nextPage)]);
     } catch (err) {
       setError(err.message);
+      showToast(err.message, 'error');
       if (/Unauthorized/i.test(err.message)) logout();
     } finally {
-      setDeletingId(null);
+      setDeleting(false);
     }
   };
 
@@ -203,11 +207,11 @@ export default function OverviewSection() {
                         <OpsButton
                           tone="danger"
                           size="small"
-                          disabled={Boolean(deletingId)}
-                          onClick={() => handleDelete(w)}
+                          disabled={deleting}
+                          onClick={() => setPendingDelete(w)}
                           sx={{ minHeight: 36, py: 0.75, px: 1.5 }}
                         >
-                          {deletingId === w.id ? 'Deleting…' : 'Delete'}
+                          Delete
                         </OpsButton>
                       </td>
                     </tr>
@@ -217,12 +221,26 @@ export default function OverviewSection() {
             </Box>
             <PaginationBar
               pagination={pagination}
-              loading={listLoading || Boolean(deletingId)}
+              loading={listLoading || deleting}
               onPageChange={(p) => loadWebinars(p)}
             />
           </>
         )}
       </OpsCard>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete webinar?"
+        description={
+          pendingDelete
+            ? `Delete ${pendingDelete.active ? 'the active' : 'this'} webinar “${pendingDelete.title}”? This removes it from the database and tries to delete the Zoom meeting.`
+            : ''
+        }
+        confirmLabel="Delete webinar"
+        loading={deleting}
+        onClose={() => !deleting && setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </Stack>
   );
 }

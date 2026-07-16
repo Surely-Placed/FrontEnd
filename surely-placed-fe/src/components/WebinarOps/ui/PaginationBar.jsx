@@ -19,7 +19,8 @@ export default function PaginationBar({ pagination, onPageChange, loading }) {
       gap={1}
     >
       <Typography variant="body2" color="text.secondary" lineHeight={1.4}>
-        {from}–{to} of {total} · times in EST · amounts in USD
+        {from}–{to} of {total}
+        {totalPages > 1 ? ` · page ${page}/${totalPages}` : ''} · EST · USD
       </Typography>
       <Stack direction="row" gap={1}>
         <OpsButton
