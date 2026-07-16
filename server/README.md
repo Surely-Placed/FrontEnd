@@ -103,7 +103,7 @@ fly secrets set `
   RAZORPAY_KEY_ID="rzp_live_xxx" `
   RAZORPAY_KEY_SECRET="xxx" `
   RAZORPAY_WEBHOOK_SECRET="xxx" `
-  RAZORPAY_WEBHOOK_URL="https://www.surelyplaced.com/api/webhooks/razorpay" `
+  RAZORPAY_WEBHOOK_URL="https://api.surelyplaced.com/api/webhooks/razorpay" `
   FRONTEND_ORIGIN="https://www.surelyplaced.com" `
   SITE_URL="https://www.surelyplaced.com" `
   SMTP_HOST="smtp.gmail.com" `
@@ -117,11 +117,14 @@ fly secrets set `
   ZOOM_CLIENT_SECRET="xxx" `
   --app surelyplaced-payments
 
+fly certs add api.surelyplaced.com --app surelyplaced-payments
+# Then add DNS A / AAAA records (see fly certs show)
+
 fly deploy --app surelyplaced-payments --ha=false
 ```
 
-Public API (via Vercel rewrites): `https://www.surelyplaced.com/api/...`  
-Direct Fly URL: `https://surelyplaced-payments.fly.dev`
+Public API: `https://api.surelyplaced.com`  
+Fallback Fly URL: `https://surelyplaced-payments.fly.dev`
 
 ## Frontend env (surely-placed-fe)
 
@@ -130,11 +133,11 @@ NEXT_PUBLIC_PAYMENTS_API_URL=http://localhost:8080
 PAYMENTS_API_URL=http://localhost:8080
 ```
 
-Production (Vercel) — browser uses same-origin `/api` (rewritten to Fly):
+Production (Vercel):
 
 ```env
-NEXT_PUBLIC_PAYMENTS_API_URL=https://www.surelyplaced.com
-PAYMENTS_API_URL=https://surelyplaced-payments.fly.dev
+NEXT_PUBLIC_PAYMENTS_API_URL=https://api.surelyplaced.com
+PAYMENTS_API_URL=https://api.surelyplaced.com
 ```
 
 See `RAZORPAY-INTEGRATION.md` in the repo root for the full architecture.
