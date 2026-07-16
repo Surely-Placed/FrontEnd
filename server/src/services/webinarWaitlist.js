@@ -27,34 +27,44 @@ export async function addToWaitlist({ name, email, contact }) {
   }
 
   const existing = await table('webinar_waitlist').where({ email: cleanEmail }).first();
+  let result;
+
   if (existing) {
+    // Re-submit: refresh details, clear notified_at so they get the next
+    // "seats open" email, and still alert the team.
     await table('webinar_waitlist')
       .where({ id: existing.id })
       .update({
         name: cleanName,
         contact: cleanContact || existing.contact,
+        notified_at: null,
         updated_at: db.fn.now(),
       });
-
-    return { id: existing.id, alreadyJoined: true };
+    result = { id: existing.id, alreadyJoined: true };
+  } else {
+    const [row] = await table('webinar_waitlist')
+      .insert({
+        name: cleanName,
+        email: cleanEmail,
+        contact: cleanContact,
+        metadata: { source: 'webinar-page' },
+      })
+      .returning('*');
+    result = { id: row.id, alreadyJoined: false };
   }
 
-  const [row] = await table('webinar_waitlist')
-    .insert({
+  try {
+    await sendWaitlistSignupAlert({
       name: cleanName,
       email: cleanEmail,
       contact: cleanContact,
-      metadata: { source: 'webinar-page' },
-    })
-    .returning('*');
-
-  try {
-    await sendWaitlistSignupAlert({ name: cleanName, email: cleanEmail, contact: cleanContact });
+      alreadyJoined: result.alreadyJoined,
+    });
   } catch (err) {
     console.error('Waitlist signup alert failed:', err.message);
   }
 
-  return { id: row.id, alreadyJoined: false };
+  return result;
 }
 
 export async function listWaitlist({ page = 1, pageSize = 20, pendingOnly = false } = {}) {

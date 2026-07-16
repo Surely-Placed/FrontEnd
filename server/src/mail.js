@@ -232,7 +232,7 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
   }
 }
 
-export async function sendWaitlistSignupAlert({ name, email, contact }) {
+export async function sendWaitlistSignupAlert({ name, email, contact, alreadyJoined = false }) {
   const transport = getTransporter();
   const teamEmail = config.smtp.webinarNotify || config.smtp.to;
   if (!transport || !teamEmail || !config.smtp.from) return;
@@ -240,14 +240,19 @@ export async function sendWaitlistSignupAlert({ name, email, contact }) {
   await transport.sendMail({
     from: mailFrom(),
     to: teamEmail,
-    subject: `[Surely Placed] Webinar waitlist — ${name}`,
+    subject: alreadyJoined
+      ? `[Surely Placed] Webinar waitlist (re-joined) — ${name}`
+      : `[Surely Placed] Webinar waitlist — ${name}`,
     html: buildEmailHtml({
-      title: 'New webinar waitlist signup',
-      intro: 'Someone wants to be notified when the next webinar is scheduled.',
+      title: alreadyJoined ? 'Waitlist signup (re-joined)' : 'New webinar waitlist signup',
+      intro: alreadyJoined
+        ? 'Someone already on the waitlist submitted the notify form again. They are re-queued for the next seats-open email.'
+        : 'Someone wants to be notified when the next webinar is scheduled.',
       lines: [
         { label: 'Name', value: name },
         { label: 'Email', value: email },
         { label: 'Phone', value: contact },
+        { label: 'Status', value: alreadyJoined ? 'Re-joined' : 'New' },
       ],
     }),
   });
