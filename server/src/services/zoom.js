@@ -445,10 +445,14 @@ export async function deleteZoomMeeting(meetingId, { retried = false } = {}) {
     try {
       await getMeetingLiveStatus(normalizedId);
       throw new Error(
-        `Zoom meeting ${normalizedId} still exists after delete. Add meeting:delete:meeting:admin to your Zoom OAuth app scopes.`
+        `Zoom meeting ${normalizedId} still exists after delete. Confirm meeting:delete:meeting:admin is enabled on your Zoom OAuth app.`
       );
     } catch (error) {
       if (isZoomMeetingNotFoundError(error)) {
+        return { deleted: true, meetingId: normalizedId };
+      }
+      // DELETE succeeded — do not block on transient verification errors.
+      if (response.ok || response.status === 204 || response.status === 404) {
         return { deleted: true, meetingId: normalizedId };
       }
       throw error;

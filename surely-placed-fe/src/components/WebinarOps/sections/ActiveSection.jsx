@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Box, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
+import { showToast } from '@/hooks/showToast';
 import { adminFetch } from '../api';
 import { useOps } from '../OpsContext';
 import { formatEst, formatMoneyUsd } from '../format';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import OpsButton from '../ui/OpsButton';
 import OpsCard from '../ui/OpsCard';
 import OpsField from '../ui/OpsField';
@@ -14,6 +16,7 @@ export default function ActiveSection() {
   const { token, logout, setMessage, setError } = useOps();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [active, setActive] = useState(null);
   const [seatEdit, setSeatEdit] = useState({ seatsTotal: 25, seatsLeft: 5 });
@@ -99,11 +102,38 @@ export default function ActiveSection() {
         method: 'PATCH',
         body: { active: false },
       });
-      setMessage('Webinar deactivated. Landing page shows the waitlist form.');
+      setMessage('Webinar deactivated. Landing page shows the waitlist form. The Zoom meeting is still scheduled.');
       setEditing(false);
       await load();
     } catch (err) {
       setError(err.message);
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteWebinar = async () => {
+    if (!active?.id) return;
+    setSaving(true);
+    setError('');
+    try {
+      const result = await adminFetch(`/api/admin/webinars/${active.id}`, {
+        token,
+        method: 'DELETE',
+      });
+      const zoomNote =
+        result.zoomDeleted && result.zoomMeetingId
+          ? ` Zoom meeting ${result.zoomMeetingId} removed.`
+          : '';
+      setMessage(`Webinar deleted.${zoomNote}`);
+      showToast(`Deleted “${active.title}”.${zoomNote}`, 'success');
+      setConfirmDelete(false);
+      setEditing(false);
+      await load();
+    } catch (err) {
+      setError(err.message);
+      showToast(err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -217,14 +247,39 @@ export default function ActiveSection() {
                 <OpsButton tone="secondary" onClick={cancelEdit} disabled={saving}>
                   Cancel
                 </OpsButton>
-                <OpsButton tone="danger" onClick={deactivate} disabled={saving}>
-                  Deactivate
+                <OpsButton tone="secondary" onClick={deactivate} disabled={saving}>
+                  Deactivate only
+                </OpsButton>
+                <OpsButton tone="danger" onClick={() => setConfirmDelete(true)} disabled={saving}>
+                  Delete webinar
                 </OpsButton>
               </Stack>
             </Stack>
           )}
+
+          {!editing && active && (
+            <Stack direction="row" gap={1} flexWrap="wrap" pt={1}>
+              <OpsButton tone="danger" disabled={saving} onClick={() => setConfirmDelete(true)}>
+                Delete webinar
+              </OpsButton>
+            </Stack>
+          )}
         </Stack>
       )}
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete webinar?"
+        description={
+          active
+            ? `Delete “${active.title}” and remove Zoom meeting ${active.zoomMeetingId || '(not linked)'}? This permanently removes the webinar from ops and Zoom. Use “Deactivate only” if you just want to hide it from the landing page.`
+            : ''
+        }
+        confirmLabel="Delete from ops and Zoom"
+        loading={saving}
+        onClose={() => !saving && setConfirmDelete(false)}
+        onConfirm={deleteWebinar}
+      />
     </OpsCard>
   );
 }

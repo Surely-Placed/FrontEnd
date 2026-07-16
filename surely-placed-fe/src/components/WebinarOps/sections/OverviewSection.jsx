@@ -80,14 +80,16 @@ export default function OverviewSection() {
     setDeleting(true);
     setError('');
     try {
-      await adminFetch(`/api/admin/webinars/${pendingDelete.id}`, {
+      const result = await adminFetch(`/api/admin/webinars/${pendingDelete.id}`, {
         token,
         method: 'DELETE',
       });
       const zoomNote =
-        pendingDelete.zoomMeetingId != null && pendingDelete.zoomMeetingId !== ''
-          ? ' Zoom meeting removed.'
-          : '';
+        result.zoomDeleted && result.zoomMeetingId
+          ? ` Zoom meeting ${result.zoomMeetingId} removed.`
+          : result.zoomMeetingId
+            ? ''
+            : '';
       showToast(`Deleted “${pendingDelete.title}”.${zoomNote}`, 'success');
       setPendingDelete(null);
       const nextPage =
