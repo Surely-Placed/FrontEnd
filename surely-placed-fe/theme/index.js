@@ -270,6 +270,7 @@ let theme = createTheme({
         root: {
           borderRadius: '1rem',
           backgroundColor: '#fff',
+          alignItems: 'center',
           // '&:hover .MuiOutlinedInput-notchedOutline': {
           //   borderColor: '#612FFF',
           // },
@@ -286,13 +287,32 @@ let theme = createTheme({
           color: '#181D27',
           fontSize: '0.875rem',
           fontWeight: 400,
-          lineHeight: '1.5rem',
+          lineHeight: 1.5,
+          // Without explicit padding, values sit against the top border and clip
+          padding: '14px 16px',
+          height: 'auto',
+          boxSizing: 'border-box',
           '::placeholder': {
             color: '#A5A5A5',
             opacity: 1,
             fontSize: '0.875rem',
             fontWeight: 400,
           },
+        },
+        inputSizeSmall: {
+          padding: '10px 14px',
+          height: 'auto',
+          boxSizing: 'border-box',
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          lineHeight: 1.4,
+        },
+        shrink: {
+          transform: 'translate(14px, -9px) scale(0.75)',
         },
       },
     },

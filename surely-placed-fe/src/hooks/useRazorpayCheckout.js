@@ -40,10 +40,42 @@ function createIdempotencyKey() {
   return `idemp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
+/** Stable key per plan+email so retries / double-clicks reuse the same order. */
+function getOrderIdempotencyKey(orderPayload) {
+  const email = String(orderPayload?.email || '')
+    .trim()
+    .toLowerCase();
+  const plan = String(orderPayload?.planSlug || 'unknown');
+  const storageKey = `sp_pay_idemp_v1:${plan}:${email}`;
+
+  try {
+    const existing = window.sessionStorage.getItem(storageKey);
+    if (existing) return existing;
+    const next = createIdempotencyKey();
+    window.sessionStorage.setItem(storageKey, next);
+    return next;
+  } catch {
+    return createIdempotencyKey();
+  }
+}
+
+function clearOrderIdempotencyKey(orderPayload) {
+  const email = String(orderPayload?.email || '')
+    .trim()
+    .toLowerCase();
+  const plan = String(orderPayload?.planSlug || 'unknown');
+  try {
+    window.sessionStorage.removeItem(`sp_pay_idemp_v1:${plan}:${email}`);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useRazorpayCheckout({ onSuccess, onFailure } = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const checkoutRef = useRef(null);
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
     loadRazorpayScript().catch(() => {});
@@ -51,12 +83,16 @@ export function useRazorpayCheckout({ onSuccess, onFailure } = {}) {
 
   const startCheckout = useCallback(
     async (orderPayload) => {
+      if (inFlightRef.current) {
+        throw new Error('Checkout already in progress. Please wait.');
+      }
+      inFlightRef.current = true;
       setLoading(true);
       setError(null);
 
       try {
         const Razorpay = await loadRazorpayScript();
-        const idempotencyKey = createIdempotencyKey();
+        const idempotencyKey = getOrderIdempotencyKey(orderPayload);
         const order = await createPaymentOrder(orderPayload, idempotencyKey);
 
         return new Promise((resolve, reject) => {
@@ -83,7 +119,8 @@ export function useRazorpayCheckout({ onSuccess, onFailure } = {}) {
             },
             handler: async (response) => {
               try {
-                const verifyIdempotencyKey = createIdempotencyKey();
+                // Same Razorpay payment id → same verify key (safe on double fire)
+                const verifyIdempotencyKey = `verify_${response.razorpay_payment_id}`.slice(0, 100);
                 const verified = await verifyPayment(
                   {
                     orderId: order.orderId,
@@ -93,6 +130,7 @@ export function useRazorpayCheckout({ onSuccess, onFailure } = {}) {
                   },
                   verifyIdempotencyKey
                 );
+                clearOrderIdempotencyKey(orderPayload);
                 onSuccess?.(verified, order);
                 resolve(verified);
               } catch (verifyError) {
@@ -105,11 +143,13 @@ export function useRazorpayCheckout({ onSuccess, onFailure } = {}) {
                 );
               } finally {
                 setLoading(false);
+                inFlightRef.current = false;
               }
             },
             modal: {
               ondismiss: () => {
                 setLoading(false);
+                inFlightRef.current = false;
                 onFailure?.(new Error('Checkout dismissed'), order);
                 reject(new Error('Checkout dismissed'));
               },
@@ -122,6 +162,7 @@ export function useRazorpayCheckout({ onSuccess, onFailure } = {}) {
       } catch (checkoutError) {
         setError(checkoutError.message);
         setLoading(false);
+        inFlightRef.current = false;
         onFailure?.(checkoutError);
         throw checkoutError;
       }

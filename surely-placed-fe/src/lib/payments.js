@@ -46,4 +46,20 @@ export async function getPaymentOrder(orderId) {
   return parseResponse(response);
 }
 
+export async function getActiveWebinarPublic() {
+  const response = await fetch(`${getPaymentsApiUrl()}/api/webinars/active`, {
+    cache: 'no-store',
+  });
+  return parseResponse(response);
+}
+
+export async function joinWebinarWaitlist({ name, email, contact }) {
+  const response = await fetch(`${getPaymentsApiUrl()}/api/webinars/waitlist`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify({ name, email, contact }),
+  });
+  return parseResponse(response);
+}
+
 export { getPaymentsApiUrl };

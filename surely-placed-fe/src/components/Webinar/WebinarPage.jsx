@@ -27,6 +27,7 @@ import CustomDivider from '@/common/CustomDivider';
 import { showToast } from '@/hooks/showToast';
 import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
 import { trackMetaEvent } from '@/components/seo/MetaPixel';
+import { getActiveWebinarPublic, joinWebinarWaitlist } from '@/lib/payments';
 import { ExpandIcon } from '../../../public/images';
 import {
   WEBINAR_FAQS,
@@ -188,7 +189,11 @@ const AnimatedItem = ({ children, delay = 0, sx }) => (
 );
 
 function useCountdown(targetIso) {
-  const target = useMemo(() => new Date(targetIso).getTime(), [targetIso]);
+  const target = useMemo(() => {
+    if (!targetIso) return null;
+    const t = new Date(targetIso).getTime();
+    return Number.isFinite(t) ? t : null;
+  }, [targetIso]);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -196,7 +201,7 @@ function useCountdown(targetIso) {
     return () => window.clearInterval(timer);
   }, []);
 
-  const diff = Math.max(0, target - now);
+  const diff = target == null ? 0 : Math.max(0, target - now);
   const pad = (n) => String(n).padStart(2, '0');
 
   return {
@@ -254,18 +259,27 @@ const CountdownBlock = ({ label, value }) => (
 );
 
 const WebinarPage = ({
-  price = WEBINAR_DEFAULTS.price,
-  seatsLeft = WEBINAR_DEFAULTS.seatsLeft,
-  seatsTotal = WEBINAR_DEFAULTS.seatsTotal,
+  price: priceProp = WEBINAR_DEFAULTS.price,
+  seatsLeft: seatsLeftProp = WEBINAR_DEFAULTS.seatsLeft,
+  seatsTotal: seatsTotalProp = WEBINAR_DEFAULTS.seatsTotal,
   exitPopup = true,
-  webinarDate = WEBINAR_DEFAULTS.webinarDate,
+  webinarDate: webinarDateProp = WEBINAR_DEFAULTS.webinarDate,
+  datetimeLabel: datetimeLabelProp = WEBINAR_DATETIME_LABEL,
   videoEmbedUrl = WEBINAR_DEFAULTS.videoEmbedUrl,
   onLeadCapture,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTabScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const priceLabel = `$${price}`;
+
+  const [price, setPrice] = useState(priceProp);
+  const [seatsLeft, setSeatsLeft] = useState(seatsLeftProp);
+  const [seatsTotal, setSeatsTotal] = useState(seatsTotalProp);
+  const [webinarDate, setWebinarDate] = useState(webinarDateProp);
+  const [datetimeLabel, setDatetimeLabel] = useState(datetimeLabelProp);
+  const [webinarActive, setWebinarActive] = useState(true);
+
+  const priceLabel = `$${Number(price).toFixed(2)}`;
   const cd = useCountdown(webinarDate);
 
   const [registrationOpen, setRegistrationOpen] = useState(false);
@@ -277,11 +291,51 @@ const WebinarPage = ({
   const [exitName, setExitName] = useState('');
   const [exitEmail, setExitEmail] = useState('');
   const [exitSent, setExitSent] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyName, setNotifyName] = useState('');
+  const [notifyEmail, setNotifyEmail] = useState('');
+  const [notifyPhone, setNotifyPhone] = useState('');
+  const [notifyError, setNotifyError] = useState('');
+  const [notifyLoading, setNotifyLoading] = useState(false);
+  const [notifySent, setNotifySent] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const applyWebinar = (w) => {
+      if (!w || cancelled) return;
+      setWebinarActive(w.active !== false);
+      if (typeof w.seatsLeft === 'number') setSeatsLeft(w.seatsLeft);
+      if (typeof w.seatsTotal === 'number') setSeatsTotal(w.seatsTotal);
+      if (w.priceCents) setPrice(w.priceCents / 100);
+      if (w.startsAt) setWebinarDate(w.startsAt);
+      if (w.datetimeLabel) setDatetimeLabel(w.datetimeLabel);
+    };
+
+    const refresh = () =>
+      getActiveWebinarPublic()
+        .then((data) => applyWebinar(data?.webinar))
+        .catch(() => {
+          /* keep last known values */
+        });
+
+    refresh();
+    const timer = window.setInterval(refresh, 10_000);
+    const onFocus = () => refresh();
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
 
   const { startCheckout, loading: checkoutLoading } = useRazorpayCheckout({
     onSuccess: () => {
       setRegistrationOpen(false);
       setSuccess(true);
+      setSeatsLeft((n) => Math.max(0, Number(n) - 1));
       trackMetaEvent('Lead', { content_name: 'Webinar Registration' });
       trackMetaEvent('Purchase', {
         value: price,
@@ -310,6 +364,12 @@ const WebinarPage = ({
   const setField = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
   const openCheckout = () => {
+    if (!webinarActive) {
+      setNotifyOpen(true);
+      setNotifyError('');
+      setNotifySent(false);
+      return;
+    }
     setRegistrationOpen(true);
     setFormError('');
     trackMetaEvent('InitiateCheckout', {
@@ -317,6 +377,34 @@ const WebinarPage = ({
       currency: 'USD',
       content_name: 'Live Career Webinar',
     });
+  };
+
+  const submitNotify = async () => {
+    if (!notifyName.trim()) {
+      setNotifyError('Please enter your name.');
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(notifyEmail.trim())) {
+      setNotifyError('Please enter a valid email.');
+      return;
+    }
+    setNotifyLoading(true);
+    setNotifyError('');
+    try {
+      await joinWebinarWaitlist({
+        name: notifyName.trim(),
+        email: notifyEmail.trim(),
+        contact: notifyPhone.trim() || undefined,
+      });
+      setNotifySent(true);
+      onLeadCapture?.({ name: notifyName.trim(), email: notifyEmail.trim() });
+      trackMetaEvent('Lead', { content_name: 'Webinar Waitlist' });
+      showToast('You are on the waitlist. We will email you when seats open.', 'success');
+    } catch (err) {
+      setNotifyError(err?.message || 'Could not join waitlist. Please try again.');
+    } finally {
+      setNotifyLoading(false);
+    }
   };
 
   const validateRegistration = () => {
@@ -379,11 +467,13 @@ const WebinarPage = ({
       onClick={openCheckout}
       sx={{ ...primaryCtaSx, width: fullWidth ? '100%' : 'auto' }}
     >
-      Reserve My Seat — {priceLabel}
+      {webinarActive ? `Reserve My Seat — ${priceLabel}` : 'Notify Me When Seats Open'}
     </Button>
   );
 
-  const seatsProgress = Math.round((seatsLeft / seatsTotal) * 100);
+  const seatsFilled = Math.max(0, seatsTotal - seatsLeft);
+  const seatsProgress =
+    seatsTotal > 0 ? Math.min(100, Math.round((seatsFilled / seatsTotal) * 100)) : 0;
 
   return (
     <>
@@ -391,7 +481,7 @@ const WebinarPage = ({
       <Box sx={{ bgcolor: 'extremes.light', pt: { xs: '6rem', lg: '6.5rem' } }}>
         <AnimatedSection sx={{ ...sectionSx, textAlign: 'center' }}>
           <Chip
-            label="Live Webinar · Sunday, July 20, 2026 · 8 PM ET"
+            label={`Live Webinar · ${datetimeLabel}`}
             sx={{
               mb: 2,
               bgcolor: 'customGreen.main',
@@ -872,14 +962,14 @@ const WebinarPage = ({
         >
           <Box>
             <Typography variant="subtitle2" fontWeight={600}>
-              July 20 · 8 PM ET
+              {datetimeLabel}
             </Typography>
             <Typography variant="caption" color="secondary.main">
               {seatsLeft} seats left
             </Typography>
           </Box>
           <Button variant="filled" onClick={openCheckout} sx={primaryCtaSx}>
-            Reserve · {priceLabel}
+            {webinarActive ? `Reserve · ${priceLabel}` : 'Notify Me'}
           </Button>
         </Box>
       )}
@@ -897,7 +987,7 @@ const WebinarPage = ({
               Register for the webinar
             </Typography>
             <Typography variant="body2" color="text.subText">
-              Live webinar · {WEBINAR_DATETIME_LABEL} · {priceLabel}
+              Live webinar · {datetimeLabel} · {priceLabel}
             </Typography>
             <TextField
               fullWidth
@@ -1022,7 +1112,7 @@ const WebinarPage = ({
             You&apos;re in. Congratulations!
           </Typography>
           <Typography variant="body1" color="text.subText" mb={2}>
-            Payment confirmed. A confirmation email is on its way to{' '}
+            Payment confirmed. A confirmation email with your unique Zoom join link is on its way to{' '}
             <Typography component="span" fontWeight={600} color="text">
               {form.email || 'your email'}
             </Typography>
@@ -1030,9 +1120,9 @@ const WebinarPage = ({
           </Typography>
           <Box sx={{ bgcolor: 'customBlue.secondary', borderRadius: '1rem', p: 2.5, textAlign: 'left', mb: 2 }}>
             {[
-              'Webinar access · ' + WEBINAR_DATETIME_LABEL,
-              'Calendar invite',
-              'Joining link',
+              'Webinar access · ' + datetimeLabel,
+              'Unique Zoom join link (check your email)',
+              'Calendar details in confirmation email',
               'Software Career Playbook (instant download)',
             ].map((item) => (
               <Typography key={item} variant="body2" color="text.subText" mb={0.75}>
@@ -1067,6 +1157,71 @@ const WebinarPage = ({
           ) : (
             <Typography variant="body2" color="text.subText">
               ✓ Checklist sent. Check your inbox. Your seat is still waiting if you change your mind.
+            </Typography>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* No webinar scheduled — waitlist */}
+      <Dialog
+        open={notifyOpen}
+        onClose={() => !notifyLoading && setNotifyOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogContent sx={{ p: 3 }}>
+          <Typography component="h3" variant="h6" fontFamily={'var(--font-avantgarde), sans-serif'} mb={1}>
+            No webinar scheduled right now
+          </Typography>
+          {!notifySent ? (
+            <Stack spacing={2}>
+              <Typography variant="body2" color="text.subText">
+                Leave your details and we&apos;ll notify you as soon as the next live session opens
+                for registration.
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                label="Name"
+                value={notifyName}
+                onChange={(e) => setNotifyName(e.target.value)}
+              />
+              <TextField
+                fullWidth
+                required
+                label="Email"
+                type="email"
+                value={notifyEmail}
+                onChange={(e) => setNotifyEmail(e.target.value)}
+              />
+              <TextField
+                fullWidth
+                label="Phone (optional)"
+                value={notifyPhone}
+                onChange={(e) => setNotifyPhone(e.target.value)}
+              />
+              {notifyError && (
+                <Typography variant="body2" color="error">
+                  {notifyError}
+                </Typography>
+              )}
+              <Button
+                variant="filled"
+                fullWidth
+                disabled={notifyLoading}
+                onClick={submitNotify}
+                sx={primaryCtaSx}
+              >
+                {notifyLoading ? (
+                  <CircularProgress size={22} sx={{ color: '#fff' }} />
+                ) : (
+                  'Notify Me'
+                )}
+              </Button>
+            </Stack>
+          ) : (
+            <Typography variant="body2" color="text.subText">
+              ✓ You&apos;re on the list. We&apos;ll email you the moment seats open.
             </Typography>
           )}
         </DialogContent>
