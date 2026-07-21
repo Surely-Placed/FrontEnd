@@ -73,8 +73,8 @@ export default function SsgPrivacyPolicy() {
         Gmail data is accessed solely to provide user-facing recruitment CRM features, including:
       </p>
       <ul>
-        <li>Displaying candidate email conversations</li>
-        <li>Synchronizing recruitment emails</li>
+        <li>Displaying complete candidate email conversation history</li>
+        <li>Synchronizing recruitment-related email conversations</li>
         <li>Detecting new candidate replies</li>
         <li>Maintaining communication history</li>
         <li>Automating recruitment workflow updates</li>
@@ -92,6 +92,11 @@ export default function SsgPrivacyPolicy() {
       <p>
         Gmail data is used only to provide the features explicitly requested by the authenticated
         user, as described above.
+      </p>
+      <p>
+        Gmail data is accessed only after explicit user authorization and only for the authenticated
+        user&apos;s own Gmail account. We do not access, process, or synchronize Gmail data belonging
+        to other users.
       </p>
       <p>Gmail data is NOT used for:</p>
       <ul>
@@ -114,6 +119,18 @@ export default function SsgPrivacyPolicy() {
         <li>Industry-standard security practices</li>
         <li>Protection against unauthorized access</li>
       </ul>
+      <p>
+        OAuth access and refresh tokens are encrypted during transmission and stored securely using
+        industry-standard security controls.
+      </p>
+      <p>
+        Access to synchronized Gmail data is restricted to authorized application components and
+        protected against unauthorized access.
+      </p>
+      <p>
+        We continuously maintain administrative, technical, and physical safeguards to protect
+        sensitive user data from unauthorized access, disclosure, alteration, or destruction.
+      </p>
 
       <h2>7. Data Sharing</h2>
       <p>Gmail data is never sold or shared with third parties, except:</p>
@@ -124,9 +141,11 @@ export default function SsgPrivacyPolicy() {
 
       <h2>8. Data Retention</h2>
       <p>
-        Gmail-related data is retained only as long as necessary to provide the services requested by
-        the user. Users may disconnect their Google account or request deletion of synchronized Gmail
-        data at any time.
+        Gmail-related data is retained only for as long as necessary to provide the services requested
+        by the user. Users may disconnect their Google account or request deletion of synchronized
+        Gmail data at any time. Upon account disconnection or a verified deletion request, synchronized
+        Gmail data is permanently removed from our systems within a reasonable period unless a longer
+        retention period is required by applicable law.
       </p>
 
       <h2>9. User Controls</h2>
@@ -161,8 +180,24 @@ export default function SsgPrivacyPolicy() {
         Google user data is used only to provide user-facing functionality explicitly requested by the
         user and is never used for advertising or AI model training.
       </p>
+      <p>
+        Google Workspace APIs are not used to develop, improve, or train generalized artificial
+        intelligence (AI) or machine learning (ML) models.
+      </p>
+      <p>
+        Google user data is accessed only to provide user-facing functionality explicitly requested by
+        the authenticated user and only with the user&apos;s explicit consent.
+      </p>
 
-      <h2>11. Contact</h2>
+      <h2>11. Data Deletion</h2>
+      <p>
+        Users may request deletion of their synchronized Gmail data or disconnect their Google account
+        at any time. Upon receiving a valid deletion request, SSG ACCESS will permanently remove
+        Gmail-related data associated with the user&apos;s account within a reasonable period, except
+        where retention is required by law.
+      </p>
+
+      <h2>12. Contact</h2>
       <p>
         For privacy-related questions, contact us at:
         <br />
