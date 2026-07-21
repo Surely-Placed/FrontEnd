@@ -28,12 +28,14 @@ export default function SsgTermsPage() {
         <li>Not misuse content, recordings, or materials</li>
       </ul>
 
-      <h2>4. Google &amp; Gmail Integration (Monitoring Only)</h2>
+      <h2>4. Google &amp; Gmail Integration (Read-Only)</h2>
       <p>
-        If you connect a Google or Gmail account, you authorize SSG Access to read your Gmail data{' '}
-        <strong>for monitoring purposes only</strong>, as described in our{' '}
-        <Link href={R.privacy}>Privacy Policy</Link>. Gmail message content is <strong>not stored</strong>{' '}
-        on our servers. You may revoke access at any time.
+        If you connect a Google or Gmail account, you authorize SSG Access to read your Gmail data
+        using the read-only scope{' '}
+        <code>https://www.googleapis.com/auth/gmail.readonly</code>, solely to provide recruitment CRM
+        features as described in our <Link href={R.privacy}>Privacy Policy</Link>. SSG Access{' '}
+        <strong>never sends, modifies, deletes, archives, labels, or otherwise changes</strong> your
+        Gmail data. You may disconnect your account or revoke access at any time.
       </p>
 
       <h2>5. No Guarantee of Employment</h2>

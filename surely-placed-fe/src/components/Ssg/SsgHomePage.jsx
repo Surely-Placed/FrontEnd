@@ -210,25 +210,26 @@ export default function SsgHomePage() {
         <section style={styles.highlight}>
           <h2 style={styles.h2}>Why we request Google / Gmail data</h2>
           <p style={{ ...styles.body, marginTop: 12 }}>
-            SSG Access requests access to a candidate&apos;s Gmail account{' '}
-            <strong style={{ color: '#292929' }}>only with their explicit consent</strong> and only for
-            the following purpose:
+            SSG Access requests access to Gmail{' '}
+            <strong style={{ color: '#292929' }}>
+              only after explicit user authorization through Google&apos;s OAuth 2.0 process
+            </strong>
+            , and requests only the read-only scope{' '}
+            <code>https://www.googleapis.com/auth/gmail.readonly</code>. Gmail data is used solely to
+            provide the following recruitment CRM features:
           </p>
           <ul style={styles.list}>
-            <li>
-              To <strong>monitor</strong> job application and interview-related email activity as part
-              of Surely Placed&apos;s coaching program
-            </li>
-            <li>
-              To display application and interview progress metrics to the candidate and authorized
-              Surely Placed staff
-            </li>
-            <li>To support coaching, accountability, and program oversight</li>
+            <li>Displaying candidate email conversations</li>
+            <li>Synchronizing recruitment emails</li>
+            <li>Detecting new candidate replies</li>
+            <li>Maintaining communication history</li>
+            <li>Automating recruitment workflow updates</li>
           </ul>
           <p style={{ ...styles.body, marginTop: 16 }}>
-            We do <strong>not</strong> use Gmail data for advertising, sell Gmail data, or store Gmail
-            message content on our servers. Gmail data is accessed for real-time monitoring only.
-            Candidates may disconnect their Google account at any time.
+            SSG Access <strong>never sends, modifies, deletes, archives, labels, or otherwise changes</strong>{' '}
+            Gmail data. We do <strong>not</strong> use Gmail data for advertising, marketing, user
+            profiling, AI model training, or selling user information. Users may disconnect their
+            Google account or revoke access at any time.
           </p>
           <p style={{ fontSize: '0.875rem' }}>
             For full details, see our{' '}
