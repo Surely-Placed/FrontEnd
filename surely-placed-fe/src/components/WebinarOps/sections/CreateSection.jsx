@@ -10,7 +10,7 @@ import {
   DEFAULT_SEATS_TOTAL,
   TZ,
 } from '../constants';
-import { formatDisplayLabelFromLocal, formatMoneyUsd } from '../format';
+import { formatDisplayLabelFromLocal, easternWallTimeToIso, formatMoneyUsd } from '../format';
 import { useOps } from '../OpsContext';
 import OpsButton from '../ui/OpsButton';
 import OpsCard from '../ui/OpsCard';
@@ -56,13 +56,19 @@ export default function CreateSection() {
     setError('');
     setMessage('');
     try {
+      const startsAtIso = easternWallTimeToIso(form.startsAt);
+      if (!startsAtIso) {
+        setError('Invalid start date/time.');
+        setSaving(false);
+        return;
+      }
       const data = await adminFetch('/api/admin/webinars', {
         token,
         method: 'POST',
         body: {
           title: form.title,
           datetimeLabel: form.datetimeLabel,
-          startsAt: form.startsAt,
+          startsAt: startsAtIso,
           seatsTotal: Number(form.seatsTotal),
           seatsLeft: Number(form.seatsLeft),
           priceCents: Math.round(dollars * 100),
@@ -89,8 +95,8 @@ export default function CreateSection() {
         Create webinar
       </Typography>
       <Typography variant="body2" color="text.secondary" mb={3} lineHeight={1.5}>
-        Pick a start time first — the public label and seats fill in automatically. Timezone is EST;
-        currency is USD.
+        Pick a start time first — the public label and seats fill in automatically. Enter the time in
+        US Eastern Time (ET); currency is USD.
       </Typography>
 
       <Box component="form" onSubmit={submit}>
@@ -103,10 +109,11 @@ export default function CreateSection() {
           />
 
           <OpsField
-            label="Starts at (EST)"
+            label="Starts at (US Eastern Time)"
             type="datetime-local"
             value={form.startsAt}
             onChange={(e) => onPickStart(e.target.value)}
+            helperText="Enter the Eastern Time the webinar starts — not your local time."
             required
           />
 
