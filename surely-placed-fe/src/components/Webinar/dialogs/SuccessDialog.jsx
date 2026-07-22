@@ -16,7 +16,8 @@ export function SuccessDialog({ open, onClose, email, datetimeLabel }) {
           You&apos;re in. Congratulations!
         </Typography>
         <Typography variant="body1" color="text.subText" mb={2}>
-          Payment confirmed. A confirmation email with your unique Zoom join link is on its way to{' '}
+          Payment confirmed. A confirmation email with your one-device Zoom access link is on its way
+          to{' '}
           <Typography component="span" fontWeight={600} color="text">
             {email || 'your email'}
           </Typography>
@@ -33,8 +34,8 @@ export function SuccessDialog({ open, onClose, email, datetimeLabel }) {
         >
           {[
             'Webinar access · ' + datetimeLabel,
-            'Unique Zoom join link (check your email)',
-            'Calendar details in confirmation email',
+            'One-device Zoom access link (check your email)',
+            'Opening the link on a second device is blocked',
             'Software Career Playbook (instant download)',
           ].map((item) => (
             <Typography key={item} variant="body2" color="text.subText" mb={0.75}>

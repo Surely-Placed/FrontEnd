@@ -146,7 +146,12 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
   const webinar = isWebinarOrder(plan, order);
   const registrationLines = getRegistrationLines(order, customer);
   const zoom = order?.metadata?.zoom || {};
-  const joinUrl = zoom.join_url || null;
+  const zoomJoinUrl = zoom.join_url || null;
+  const portalJoinUrl = zoom.join_access_token
+    ? `${(config.siteUrl || 'https://www.surelyplaced.com').replace(/\/$/, '')}/webinar/join?token=${encodeURIComponent(zoom.join_access_token)}`
+    : null;
+  // Customers get the single-device portal link; team email still gets raw Zoom URL for ops
+  const customerJoinUrl = portalJoinUrl || zoomJoinUrl;
   const datetimeLabel = getWebinarDatetimeLabel(order);
 
   const paymentLines = [
@@ -154,10 +159,14 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
     { label: 'Amount paid', value: amount },
     { label: 'Webinar date', value: webinar ? datetimeLabel : null },
     { label: 'Order ID', value: order.id },
-    { label: 'Payment ID', value: payment?.razorpay_payment_id || 'Confirmed' },
+    { label: 'Payment ID', value: payment?.paypal_payment_id || 'Confirmed' },
     { label: 'Zoom registrant ID', value: zoom.registrant_id || null },
-    { label: 'Zoom join link', value: joinUrl },
-    { label: 'Zoom status', value: zoom.error ? `FAILED: ${zoom.error}` : joinUrl ? 'Registered' : null },
+    { label: 'Portal join link (1 device)', value: portalJoinUrl },
+    { label: 'Zoom join link (raw)', value: zoomJoinUrl },
+    {
+      label: 'Zoom status',
+      value: zoom.error ? `FAILED: ${zoom.error}` : zoomJoinUrl ? 'Registered' : null,
+    },
     ...registrationLines,
   ];
 
@@ -186,7 +195,7 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
           datetimeLabel,
           amountPaid: amount,
           orderId: order.id,
-          joinUrl,
+          joinUrl: customerJoinUrl,
           logoUrl: `cid:${LOGO_CID}`,
           siteUrl,
           supportEmail,
@@ -194,7 +203,7 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
           calendarUrl: buildGoogleCalendarUrl({
             title: plan?.name || 'Surely Placed Live Webinar',
             datetimeLabel,
-            joinUrl,
+            joinUrl: customerJoinUrl,
             siteUrl,
           }),
         })
@@ -230,6 +239,32 @@ export async function sendPaymentEmails({ order, plan, customer, payment }) {
         : {}),
     });
   }
+}
+
+export async function sendWebinarJoinOtpEmail({ to, name, otp }) {
+  const transport = getTransporter();
+  if (!transport || !config.smtp.from) {
+    throw new Error('SMTP is not configured — cannot send join verification code');
+  }
+
+  const safeName = name || 'there';
+  await transport.sendMail({
+    from: mailFrom(),
+    to,
+    subject: `${otp} is your Surely Placed webinar access code`,
+    html: buildEmailHtml({
+      title: 'Webinar access code',
+      intro: `Hi ${safeName}, use this code to open your paid Zoom seat. It expires in 10 minutes.`,
+      lines: [
+        { label: 'Access code', value: String(otp) },
+        {
+          label: 'Note',
+          value:
+            'Only the email that paid for this webinar can use this code. Do not share it.',
+        },
+      ],
+    }),
+  });
 }
 
 export async function sendWaitlistSignupAlert({ name, email, contact, alreadyJoined = false }) {

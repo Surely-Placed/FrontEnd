@@ -30,6 +30,38 @@ export function splitFullName(fullName) {
   return { firstName, lastName };
 }
 
+/**
+ * Force Zoom Web Client (browser) — never the desktop/mobile app deep link.
+ * By default STRIPS registrant `tk` so the buyer must sign into Zoom with the
+ * same email they paid/registered with. Unique tk links would bypass that check.
+ */
+export function toZoomWebClientJoinUrl(joinUrl, { requireSignedInRegistrant = true } = {}) {
+  if (!joinUrl) return null;
+  try {
+    const url = new URL(String(joinUrl));
+    const pwd = url.searchParams.get('pwd') || '';
+    const tk = url.searchParams.get('tk') || '';
+
+    const idMatch =
+      url.pathname.match(/\/(?:j|w|wc\/join)\/(\d+)/i) ||
+      url.pathname.match(/\/(\d{9,})(?:\/|$)/);
+    const meetingId = idMatch?.[1];
+    if (!meetingId) return String(joinUrl);
+
+    // Always use web client path (browser), not /j/ or /w/ which prompt the app
+    const web = new URL(`https://${url.host}/wc/join/${meetingId}`);
+    if (pwd) web.searchParams.set('pwd', pwd);
+    // Omit tk so Zoom requires sign-in as an approved registrant email
+    if (!requireSignedInRegistrant && tk) {
+      web.searchParams.set('tk', tk);
+    }
+    web.searchParams.set('fromPWA', '1');
+    return web.toString();
+  } catch {
+    return String(joinUrl);
+  }
+}
+
 async function getAccessToken() {
   if (cachedToken && Date.now() < cachedTokenExpiresAt - 60_000) {
     return cachedToken;
@@ -236,12 +268,14 @@ export async function createRegistrationMeeting({
     join_before_host: false,
     mute_upon_entry: true,
     waiting_room: true,
-    // Manual approval: Zoom's public register page alone cannot get people in.
-    // Paid users are added via API with auto_approve: true (unique join_url).
+    // Registration required + Zoom sign-in required.
+    // Customers get browser join WITHOUT registrant tk, so they must sign into Zoom
+    // with the same email we registered via API after payment.
     approval_type: 1,
     registration_type: 1,
     registrants_confirmation_email: false,
-    meeting_authentication: false,
+    meeting_authentication: true,
+    allow_multiple_devices: false,
   };
 
   const total = Number(seatsTotal);
@@ -381,6 +415,8 @@ export async function updateMeetingRegistrationCap(meetingId, seatsTotal) {
         join_before_host: false,
         waiting_room: true,
         registrants_confirmation_email: false,
+        meeting_authentication: true,
+        allow_multiple_devices: false,
       },
     }),
   });
@@ -413,6 +449,8 @@ export async function ensureMeetingHostGate(meetingId) {
         waiting_room: true,
         approval_type: 1,
         registrants_confirmation_email: false,
+        meeting_authentication: true,
+        allow_multiple_devices: false,
       },
     }),
   });
@@ -471,6 +509,58 @@ export async function deleteZoomMeeting(meetingId, { retried = false } = {}) {
   }
 
   throw new Error(errMessage);
+}
+
+/**
+ * Remove a meeting registrant (cleanup / refund / ops delete).
+ * Tries DELETE first, then cancel via status API if scopes lack delete.
+ */
+export async function deleteMeetingRegistrant({ meetingId, registrantId }) {
+  if (!isZoomAuthConfigured()) {
+    throw new Error('Zoom is not configured');
+  }
+  if (!meetingId || !registrantId) {
+    throw new Error('meetingId and registrantId are required');
+  }
+
+  const token = await getAccessToken();
+  const deleteRes = await fetch(
+    `${ZOOM_API_BASE}/meetings/${encodeURIComponent(meetingId)}/registrants/${encodeURIComponent(registrantId)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  if (deleteRes.status === 204 || deleteRes.status === 200 || deleteRes.status === 404) {
+    return { deleted: deleteRes.status !== 404, method: 'delete' };
+  }
+
+  // Fallback: cancel registrant (often allowed with meeting:write scopes)
+  const cancelRes = await fetch(
+    `${ZOOM_API_BASE}/meetings/${encodeURIComponent(meetingId)}/registrants/status`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'cancel',
+        registrants: [{ id: registrantId }],
+      }),
+    }
+  );
+
+  if (cancelRes.status === 204 || cancelRes.status === 200 || cancelRes.ok) {
+    return { deleted: true, method: 'cancel' };
+  }
+
+  const deleteBody = await deleteRes.json().catch(() => ({}));
+  const cancelBody = await cancelRes.json().catch(() => ({}));
+  throw new Error(
+    `Zoom remove registrant failed (delete ${deleteRes.status}: ${deleteBody?.message || deleteRes.statusText}; cancel ${cancelRes.status}: ${cancelBody?.message || cancelRes.statusText})`
+  );
 }
 
 /** @deprecated Use addMeetingRegistrant — Pro plan uses Meetings, not Webinar add-on. */

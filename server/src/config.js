@@ -38,12 +38,11 @@ export const config = {
     password: optionalEnv('DB_PASSWORD', ''),
     schema: optionalEnv('DB_SCHEMA', 'surelyplaced'),
   },
-  razorpay: {
-    keyId: optionalEnv('RAZORPAY_KEY_ID'),
-    keySecret: optionalEnv('RAZORPAY_KEY_SECRET'),
-    webhookSecret: optionalEnv('RAZORPAY_WEBHOOK_SECRET'),
-    webhookUrl: optionalEnv('RAZORPAY_WEBHOOK_URL'),
-    checkoutConfigId: optionalEnv('RAZORPAY_CHECKOUT_CONFIG_ID'),
+  paypal: {
+    clientId: optionalEnv('PAYPAL_CLIENT_ID'),
+    clientSecret: optionalEnv('PAYPAL_CLIENT_SECRET'),
+    mode: optionalEnv('PAYPAL_MODE', 'sandbox'), // sandbox | live
+    webhookId: optionalEnv('PAYPAL_WEBHOOK_ID'),
   },
   smtp: {
     host: optionalEnv('SMTP_HOST'),
@@ -70,6 +69,6 @@ export const config = {
 };
 
 export function assertPaymentsConfig() {
-  requireEnv('RAZORPAY_KEY_ID', config.razorpay.keyId);
-  requireEnv('RAZORPAY_KEY_SECRET', config.razorpay.keySecret);
+  requireEnv('PAYPAL_CLIENT_ID', config.paypal.clientId);
+  requireEnv('PAYPAL_CLIENT_SECRET', config.paypal.clientSecret);
 }

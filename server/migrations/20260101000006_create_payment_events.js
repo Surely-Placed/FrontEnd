@@ -8,11 +8,11 @@ export async function up(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.string('event_id', 100).notNullable().unique();
     table.string('event_type', 100).notNullable();
-    table.string('razorpay_payment_id', 100);
-    table.string('razorpay_order_id', 100);
+    table.string('paypal_payment_id', 100);
+    table.string('paypal_order_id', 100);
     table.jsonb('payload').notNullable();
     table.timestamps(true, true);
-    table.index(['razorpay_order_id']);
+    table.index(['paypal_order_id']);
   });
 }
 

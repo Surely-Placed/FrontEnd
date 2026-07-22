@@ -7,7 +7,7 @@ export async function up(knex) {
   await knex.schema.withSchema(DB_SCHEMA).createTable('payments', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('order_id').notNullable().references('id').inTable(`${DB_SCHEMA}.orders`);
-    table.string('razorpay_payment_id', 100).notNullable().unique();
+    table.string('paypal_payment_id', 100).notNullable().unique();
     table.string('status', 50).notNullable();
     table.string('method', 50);
     table.integer('amount_minor').notNullable();

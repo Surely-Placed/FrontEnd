@@ -11,8 +11,8 @@ export function requireIdempotencyKey(req, res, next) {
 
 /**
  * Replay identical requests with the same Idempotency-Key.
- * Only successful / client-error responses (< 500) are cached so transient
- * server failures can be retried with the same key.
+ * Only successful 2xx responses are cached so conflicts (409) and other
+ * client errors can be retried after the underlying issue is fixed.
  */
 export function withIdempotency(route) {
   return async (req, res, next) => {
@@ -25,10 +25,11 @@ export function withIdempotency(route) {
       const originalJson = res.json.bind(res);
       let persisted = false;
       res.json = async (body) => {
-        if (!persisted && res.statusCode < 500) {
+        const code = res.statusCode || 200;
+        if (!persisted && code >= 200 && code < 300) {
           persisted = true;
           try {
-            await saveIdempotentResponse(req.idempotencyKey, route, res.statusCode || 200, body);
+            await saveIdempotentResponse(req.idempotencyKey, route, code, body);
           } catch (saveError) {
             // Another concurrent request may have saved first — still return our body
             console.error('Idempotency save failed:', saveError.message);

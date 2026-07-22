@@ -15,6 +15,7 @@ import {
   updateWebinarSeats,
 } from '../services/webinarEvents.js';
 import { listWaitlist } from '../services/webinarWaitlist.js';
+import { deleteWebinarAttendee, resetWebinarJoinDevice } from '../services/orders.js';
 import { isZoomAuthConfigured } from '../services/zoom.js';
 
 const router = Router();
@@ -29,6 +30,24 @@ router.post('/login', (req, res) => {
     token,
     email: String(email).trim().toLowerCase(),
   });
+});
+
+router.delete('/attendees/:orderId', requireAdmin, async (req, res, next) => {
+  try {
+    const result = await deleteWebinarAttendee(req.params.orderId);
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/attendees/:orderId/reset-device', requireAdmin, async (req, res, next) => {
+  try {
+    const result = await resetWebinarJoinDevice(req.params.orderId);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get('/me', requireAdmin, (_req, res) => {

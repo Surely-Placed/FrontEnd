@@ -64,7 +64,7 @@ export function buildWebinarConfirmationHtml({
   const safeCalendar = calendarUrl ? escapeHtml(calendarUrl) : '';
 
   const intro = joinUrl
-    ? `Thanks for registering, <strong style="color:#0D0D0D;">${name}</strong>. Your seat is confirmed for <strong style="color:#0D0D0D;">${when}</strong>. Use the button below for your unique Zoom link — only paid registrants can join. The <em>Software Career Playbook</em> will land in a separate email shortly.`
+    ? `Thanks for registering, <strong style="color:#0D0D0D;">${name}</strong>. Your seat is confirmed for <strong style="color:#0D0D0D;">${when}</strong>. Open your join link from <strong>one device only</strong> — the first device that opens it is locked for Zoom access. The <em>Software Career Playbook</em> will land in a separate email shortly.`
     : `Thanks for registering, <strong style="color:#0D0D0D;">${name}</strong>. Your seat is confirmed for <strong style="color:#0D0D0D;">${when}</strong>. Your unique Zoom join link will arrive as soon as registration finishes (usually within a few minutes). The <em>Software Career Playbook</em> will land in a separate email shortly.`;
 
   const ctaBlock = joinUrl
@@ -72,7 +72,7 @@ export function buildWebinarConfirmationHtml({
       <tr>
         <td style="padding:0 32px 12px;">
           <a href="${safeJoin}" style="display:block;text-align:center;text-decoration:none;padding:16px 24px;border-radius:12px;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:16px;color:#ffffff;background-color:#2857C4;">
-            Join Zoom Webinar →
+            Open my Zoom access →
           </a>
         </td>
       </tr>
@@ -88,8 +88,13 @@ export function buildWebinarConfirmationHtml({
           : ''
       }
       <tr>
+        <td style="padding:0 32px 24px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#6B7280;text-align:center;">
+          This link works on <strong style="color:#0D0D0D;">one device only</strong>. Opening it on another phone or laptop will be blocked.
+        </td>
+      </tr>
+      <tr>
         <td style="padding:0 32px 28px;font-size:12px;color:#9CA3AF;text-align:center;line-height:1.5;">
-          Link not working? <a href="${safeJoin}" style="color:#2857C4;word-break:break-all;">Use this backup join link</a>
+          Link not working? <a href="${safeJoin}" style="color:#2857C4;word-break:break-all;">Open your access page</a>
         </td>
       </tr>`
     : `

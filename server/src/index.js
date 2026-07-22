@@ -23,7 +23,15 @@ app.use(
 );
 
 const allowedOrigins = new Set(
-  [config.frontendOrigin, 'https://www.surelyplaced.com', 'https://surelyplaced.com'].filter(Boolean)
+  [
+    config.frontendOrigin,
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+    'https://www.surelyplaced.com',
+    'https://surelyplaced.com',
+  ].filter(Boolean)
 );
 
 app.use(
@@ -36,7 +44,16 @@ app.use(
       callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'x-razorpay-signature'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Idempotency-Key',
+      'paypal-transmission-id',
+      'paypal-transmission-time',
+      'paypal-cert-url',
+      'paypal-auth-algo',
+      'paypal-transmission-sig',
+    ],
   })
 );
 

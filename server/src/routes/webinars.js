@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getPublicWebinarConfig } from '../services/webinarEvents.js';
 import { addToWaitlist } from '../services/webinarWaitlist.js';
+import { claimWebinarJoin, requestWebinarJoinOtp } from '../services/orders.js';
 
 const router = Router();
 
@@ -8,6 +9,26 @@ router.get('/active', async (_req, res, next) => {
   try {
     const webinar = await getPublicWebinarConfig();
     res.json({ webinar });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/join/request-otp', async (req, res, next) => {
+  try {
+    const { token, email, deviceId } = req.body || {};
+    const result = await requestWebinarJoinOtp({ token, email, deviceId });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/join', async (req, res, next) => {
+  try {
+    const { token, deviceId, email, otp } = req.body || {};
+    const result = await claimWebinarJoin({ token, deviceId, email, otp });
+    res.json(result);
   } catch (error) {
     next(error);
   }

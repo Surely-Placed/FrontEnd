@@ -297,6 +297,23 @@ export async function decrementWebinarSeat(eventId) {
   clearWebinarLiveCache();
 }
 
+export async function incrementWebinarSeat(eventId) {
+  if (!eventId) {
+    const active = await getActiveWebinarEvent();
+    if (!active) return;
+    eventId = active.id;
+  }
+
+  await table('webinar_events')
+    .where({ id: eventId })
+    .update({
+      seats_left: db.raw('LEAST(seats_total, seats_left + 1)'),
+      updated_at: db.fn.now(),
+    });
+
+  clearWebinarLiveCache();
+}
+
 export async function updateWebinarSeats({ eventId, seatsTotal, seatsLeft }) {
   const event = eventId
     ? await table('webinar_events').where({ id: eventId }).first()
@@ -521,7 +538,7 @@ function mapAttendeeRow(row) {
     customerName: row.customer_name,
     customerEmail: row.customer_email,
     customerContact: row.customer_contact,
-    paymentId: row.razorpay_payment_id,
+    paymentId: row.paypal_payment_id,
     paymentStatus: row.payment_status,
     registration: row.metadata?.registration || {},
     zoom: row.metadata?.zoom || null,
@@ -572,7 +589,7 @@ export async function listWebinarAttendees({ page = 1, pageSize = 20, status } =
       'customers.name as customer_name',
       'customers.email as customer_email',
       'customers.contact as customer_contact',
-      'payments.razorpay_payment_id',
+      'payments.paypal_payment_id',
       'payments.status as payment_status'
     )
     .orderBy('orders.created_at', 'desc')

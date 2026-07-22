@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { showToast } from '@/hooks/showToast';
-import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
+import { usePayPalCheckout } from '@/hooks/usePayPalCheckout';
 import { trackMetaEvent } from '@/components/seo/MetaPixel';
 import { joinWebinarWaitlist } from '@/lib/payments';
 import { EMPTY_WEBINAR_FORM, WEBINAR_PLAN_SLUG } from '../../../mockData/Webinar';
@@ -65,7 +65,14 @@ const WebinarPage = ({
   const [notifyLoading, setNotifyLoading] = useState(false);
   const [notifySent, setNotifySent] = useState(false);
 
-  const { startCheckout, loading: checkoutLoading } = useRazorpayCheckout({
+  const {
+    startCheckout,
+    loading: checkoutLoading,
+    paymentStep,
+    buttonsHostRef,
+    resetPaymentStep,
+    error: paypalError,
+  } = usePayPalCheckout({
     onSuccess: () => {
       setRegistrationOpen(false);
       setSuccess(true);
@@ -81,11 +88,9 @@ const WebinarPage = ({
     },
     onFailure: (err) => {
       if (err?.message === 'Checkout dismissed') {
-        setRegistrationOpen(true);
         return;
       }
       setFormError(err?.message || 'Payment failed. Please try again.');
-      setRegistrationOpen(true);
       showToast(err?.message || 'Payment failed. Please try again.', 'error');
     },
   });
@@ -149,8 +154,6 @@ const WebinarPage = ({
     }
 
     setFormError('');
-    setRegistrationOpen(false);
-
     try {
       await startCheckout({
         planSlug: WEBINAR_PLAN_SLUG,
@@ -165,7 +168,6 @@ const WebinarPage = ({
         },
       });
     } catch (err) {
-      setRegistrationOpen(true);
       setFormError(err?.message || 'Unable to start payment. Please try again.');
       showToast(err?.message || 'Unable to start payment.', 'error');
     }
@@ -210,14 +212,24 @@ const WebinarPage = ({
 
       <RegistrationDialog
         open={registrationOpen}
-        onClose={() => !checkoutLoading && setRegistrationOpen(false)}
+        onClose={() => {
+          if (checkoutLoading) return;
+          resetPaymentStep();
+          setRegistrationOpen(false);
+        }}
         form={form}
         onFieldChange={setField}
-        formError={formError}
+        formError={formError || paypalError}
         datetimeLabel={datetimeLabel}
         priceLabel={priceLabel}
         checkoutLoading={checkoutLoading}
         onSubmit={submitRegistration}
+        paymentStep={paymentStep}
+        buttonsHostRef={buttonsHostRef}
+        onBackToForm={() => {
+          resetPaymentStep();
+          setFormError('');
+        }}
       />
       <SuccessDialog
         open={success}

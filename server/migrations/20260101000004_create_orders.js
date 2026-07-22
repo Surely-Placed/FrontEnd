@@ -8,7 +8,7 @@ export async function up(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('plan_id').notNullable().references('id').inTable(`${DB_SCHEMA}.plans`);
     table.uuid('customer_id').notNullable().references('id').inTable(`${DB_SCHEMA}.customers`);
-    table.string('razorpay_order_id', 100).unique();
+    table.string('paypal_order_id', 100).unique();
     table.string('status', 50).notNullable().defaultTo('created');
     table.integer('amount_minor').notNullable();
     table.string('currency', 3).notNullable();
@@ -16,7 +16,7 @@ export async function up(knex) {
     table.jsonb('metadata').defaultTo('{}');
     table.timestamps(true, true);
     table.index(['status']);
-    table.index(['razorpay_order_id']);
+    table.index(['paypal_order_id']);
   });
 }
 

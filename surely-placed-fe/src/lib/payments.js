@@ -62,4 +62,22 @@ export async function joinWebinarWaitlist({ name, email, contact }) {
   return parseResponse(response);
 }
 
+export async function claimWebinarJoinAccess({ token, deviceId, email, otp }) {
+  const response = await fetch(`${getPaymentsApiUrl()}/api/webinars/join`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify({ token, deviceId, email, otp }),
+  });
+  return parseResponse(response);
+}
+
+export async function requestWebinarJoinOtp({ token, email, deviceId }) {
+  const response = await fetch(`${getPaymentsApiUrl()}/api/webinars/join/request-otp`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify({ token, email, deviceId }),
+  });
+  return parseResponse(response);
+}
+
 export { getPaymentsApiUrl };

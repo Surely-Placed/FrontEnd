@@ -1,8 +1,19 @@
 import { Router } from 'express';
+import { config } from '../config.js';
 import { requireIdempotencyKey, withIdempotency } from '../middleware/idempotency.js';
 import { createOrder, getOrderById, verifyOrderPayment } from '../services/orders.js';
 
 const router = Router();
+
+router.get('/config', (_req, res) => {
+  res.json({
+    provider: 'paypal',
+    clientId: config.paypal.clientId || null,
+    mode: config.paypal.mode === 'live' ? 'live' : 'sandbox',
+    currency: 'USD',
+    configured: Boolean(config.paypal.clientId && config.paypal.clientSecret),
+  });
+});
 
 router.post(
   '/orders',
@@ -43,19 +54,17 @@ router.post(
   withIdempotency('POST /api/payments/verify'),
   async (req, res, next) => {
     try {
-      const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body || {};
+      const { orderId, paypalOrderId } = req.body || {};
 
-      if (!orderId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      if (!orderId || !paypalOrderId) {
         return res.status(400).json({
-          error: 'orderId, razorpayOrderId, razorpayPaymentId, and razorpaySignature are required',
+          error: 'orderId and paypalOrderId are required',
         });
       }
 
       const result = await verifyOrderPayment({
         orderId,
-        razorpayOrderId,
-        razorpayPaymentId,
-        razorpaySignature,
+        paypalOrderId,
       });
 
       return res.json({
