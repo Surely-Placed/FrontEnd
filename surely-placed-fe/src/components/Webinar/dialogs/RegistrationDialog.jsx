@@ -25,7 +25,12 @@ export function validateRegistration(form) {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
     return 'Please enter a valid email address.';
   }
-  if (!form.phone.trim()) return 'Please enter your phone number.';
+  const phone = String(form.phone || '').trim();
+  if (!phone) return 'Please enter your phone number with country code (e.g. +1 555 000 0000).';
+  // Require country code (+…) so the sheet always gets an international number
+  if (!/^\+\d[\d\s\-()]{6,}$/.test(phone)) {
+    return 'Phone must include country code, starting with + (e.g. +1 555 000 0000).';
+  }
   if (!form.country) return 'Please select your country.';
   if (!form.status) return 'Please select your current status.';
   if (!form.visa) return 'Please select your visa status.';
@@ -86,10 +91,11 @@ export function RegistrationDialog({
               <TextField
                 fullWidth
                 required
-                label="Phone"
+                label="Phone (with country code)"
                 value={form.phone}
                 onChange={onFieldChange('phone')}
                 placeholder="+1 555 000 0000"
+                helperText="Include country code, e.g. +1 or +91"
               />
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>

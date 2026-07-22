@@ -66,6 +66,10 @@ export const config = {
     password: optionalEnv('WEBINAR_ADMIN_PASSWORD', 'webinarSSG@123'),
     tokenSecret: optionalEnv('WEBINAR_ADMIN_TOKEN_SECRET', 'sp-webinar-ops-token-v1'),
   },
+  googleSheets: {
+    // Google Apps Script web app URL (POST JSON). Sheet can be public/shared.
+    webhookUrl: optionalEnv('GOOGLE_SHEETS_WEBHOOK_URL'),
+  },
 };
 
 export function assertPaymentsConfig() {

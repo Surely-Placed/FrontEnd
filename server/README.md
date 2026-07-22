@@ -162,3 +162,28 @@ Admin APIs (Bearer token from `POST /api/admin/login`):
 - `POST /api/admin/webinars` — create webinar + Zoom meeting (OAuth creds only)
 - `PATCH /api/admin/webinars/:id/seats` — change seat limits
 - `GET /api/admin/attendees` — payments / Zoom status
+
+## Google Sheets (paid webinar registrations only)
+
+Uses a **Google Apps Script web app URL** only (no service account).
+
+After successful payment, one row is appended:
+
+**Full Name | Email | Phone | Country | Current Status | Visa Status | Year Of Experience**
+
+Phone includes country code and is written as text (no `#ERROR!`).
+
+### Setup
+
+1. Create a sheet with that header row (tab name `Webinar Registrations` optional)
+2. Extensions → Apps Script → paste `server/scripts/google-sheets-apps-script.js`
+3. Deploy → New deployment → **Web app**
+   - Execute as: **Me**
+   - Who has access: **Anyone**
+4. Copy the `/exec` URL into env:
+
+```env
+GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/.../exec
+```
+
+If unset, Sheets sync is skipped (payments still work).

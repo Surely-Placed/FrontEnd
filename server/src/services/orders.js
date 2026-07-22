@@ -16,6 +16,7 @@ import {
   getActiveWebinarEvent,
   resolveActiveZoomMeetingId,
 } from './webinarEvents.js';
+import { syncPaidWebinarRegistrationToSheet } from './googleSheets.js';
 import crypto from 'crypto';
 
 const IDEMPOTENCY_TTL_HOURS = 24;
@@ -186,6 +187,27 @@ async function finalizePaidOrder(orderId) {
     await sendPaymentEmails(result);
   } catch (mailError) {
     console.error('Payment email failed:', mailError.message);
+  }
+
+  if (
+    isWebinarOrder(result.plan, result.order) &&
+    !result.order?.metadata?.google_sheets_synced_at
+  ) {
+    try {
+      await syncPaidWebinarRegistrationToSheet(result);
+      await table('orders')
+        .where({ id: orderId })
+        .update({
+          metadata: {
+            ...(result.order.metadata || {}),
+            google_sheets_synced_at: new Date().toISOString(),
+          },
+          updated_at: db.fn.now(),
+        });
+      result = await getOrderById(orderId);
+    } catch (sheetError) {
+      console.error('Google Sheets sync failed:', sheetError.message);
+    }
   }
 
   return result;
